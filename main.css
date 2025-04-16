@@ -1,0 +1,10 @@
+p {
+	color: black;
+}
+
+a {
+  text-decoration: none;
+  outline: none;
+  display: inline-block;
+  margin: 0 5px;
+}
