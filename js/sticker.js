@@ -23,7 +23,7 @@ async function addSticky({title, expDate, quantity, color = "#fffef5"}) {
               }),
             }
           ).then(response => response.text());
-        expDate = response.trim();
+        expDate = response.trim() + " (Suggested)";
       }
     
     const note = document.createElement("div");
