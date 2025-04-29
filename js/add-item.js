@@ -2,6 +2,9 @@ const p = document.querySelector("p");
 const stickyBoard = document.getElementById("sticky-board");
 const addItemForm = document.getElementById("add-item-form");
 
+// Import the API key from config
+import { OPENAI_API_KEY } from './config.js';
+
 // Function to save stickers to localStorage - reusing from sticker.js
 function saveStickersToStorage(stickers) {
   console.log('Saving stickers:', stickers);
@@ -29,14 +32,14 @@ async function categorizeSticker(title) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer REMOVED_KEY'
+        'Authorization': `Bearer ${OPENAI_API_KEY}`
       },
       body: JSON.stringify({
         model: "gpt-4o-mini",
         messages: [
           {
             role: "system",
-            content: "You are a helpful assistant that categorizes food items. Only respond with one of these categories without explanation: Dairy, Eggs, Vegetables, Fruits, Meats, Seafood, Drinks, Sauces, Other. If you are not sure, return Other."
+            content: "You are a helpful assistant that categorizes food items. Only respond with one of these categories without explanation: Dairy, Eggs, Vegetables, Fruits, Meats, Seafood, Drinks, Sauces, Other."
           },
           {
             role: "user",

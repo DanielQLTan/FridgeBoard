@@ -1,3 +1,4 @@
+require('dotenv').config(); // Load environment variables from .env file
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -8,47 +9,46 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors());
-app.use(express.json({ limit: '10mb' }));
+app.use(express.json());
 app.use(express.static(path.join(__dirname, './')));
 
-// Initialize OpenAI API with a hardcoded API key for the demo
-// TODO: Replace with environment variable before production!
+// Initialize OpenAI with API key from environment variable
 const openai = new OpenAI({
-  apiKey: "YOUR_OPENAI_API_KEY_HERE", // Replace with your actual API key
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
-// Categorization endpoint
+// API endpoint for categorization
 app.post('/api/categorize', async (req, res) => {
   try {
-    const { item } = req.body;
+    const { title } = req.body;
     
-    if (!item) {
-      return res.status(400).json({ error: 'Missing item name' });
+    if (!title) {
+      return res.status(400).json({ error: 'Missing title parameter' });
     }
-
-    const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+    
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
       messages: [
         {
           role: "system",
-          content: "You are a helpful assistant that categorizes food items. Only respond with one of these categories without explanation: Dairy, Eggs, Vegetables, Fruits, Meats, Seafood, Drinks, Sauces, Other."
+          content: "You are a helpful assistant that categorizes food items. Only respond with one of these categories without explanation: Dairy, Eggs, Vegetables, Fruits, Meats, Seafood, Drinks, Sauces, Other. If you are not sure, return Other."
         },
         {
           role: "user",
-          content: `Categorize this food item: ${item}`
+          content: `Categorize this food item: ${title}`
         }
       ],
       max_tokens: 10,
-      temperature: 0.3,
+      temperature: 0.3
     });
-
-    const category = completion.choices[0].message.content.trim();
-    console.log(`Categorized "${item}" as "${category}"`);
+    
+    const category = response.choices[0].message.content.trim();
+    console.log(`Categorized "${title}" as "${category}"`);
     
     return res.json({ category });
   } catch (error) {
-    console.error('OpenAI API error:', error);
-    return res.status(500).json({ error: 'Failed to categorize item', details: error.message });
+    console.error('Error in categorization:', error);
+    return res.status(500).json({ error: 'Server error', details: error.message });
   }
 });
 
@@ -59,5 +59,6 @@ app.get('/', (req, res) => {
 
 // Start the server
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`OpenAI API Key: ${process.env.OPENAI_API_KEY ? "Configured ✓" : "Missing ✗"}`);
 }); 

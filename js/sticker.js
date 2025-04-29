@@ -1,3 +1,5 @@
+import { OPENAI_API_KEY } from './config.js';
+
 const p = document.querySelector("p");
 
 const stickyBoard = document.getElementById("sticky-board");
@@ -23,43 +25,43 @@ window.addEventListener('load', () => {
 });
 
 async function categorizeSticker(title) {
-    try {
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'REMOVED_KEY' // Replace with your actual API key
-            },
-            body: JSON.stringify({
-                model: "gpt-3.5-turbo",
-                messages: [
-                    {
-                        role: "system",
-                        content: "You are a helpful assistant that categorizes food items. Only respond with one of these categories without explanation: Dairy, Eggs, Vegetables, Fruits, Meats, Seafood, Drinks, Sauces, Other."
-                    },
-                    {
-                        role: "user",
-                        content: `Categorize this food item: ${title}`
-                    }
-                ],
-                max_tokens: 10,
-                temperature: 0.3
-            })
-        });
+  try {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${OPENAI_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content: "You are a helpful assistant that categorizes food items. Only respond with one of these categories without explanation: Dairy, Eggs, Vegetables, Fruits, Meats, Seafood, Drinks, Sauces, Other."
+          },
+          {
+            role: "user",
+            content: `Categorize this food item: ${title}`
+          }
+        ],
+        max_tokens: 10,
+        temperature: 0.3
+      })
+    });
 
-        if (!response.ok) {
-            console.error('Error getting category from API:', await response.text());
-            return 'Other'; // Fallback category
-        }
-
-        const data = await response.json();
-        const category = data.choices[0].message.content.trim();
-        console.log(`Categorized "${title}" as "${category}"`);
-        return category;
-    } catch (error) {
-        console.error('Error in categorization:', error);
-        return 'Other'; // Return Other if API fails
+    if (!response.ok) {
+      console.error('Error getting category from API:', await response.text());
+      return 'Other'; // Fallback category
     }
+
+    const data = await response.json();
+    const category = data.choices[0].message.content.trim();
+    console.log(`Categorized "${title}" as "${category}"`);
+    return category;
+  } catch (error) {
+    console.error('Error in categorization:', error);
+    return 'Other'; // Return Other if API fails
+  }
 }
 
 // Function to delete a sticker by its index
