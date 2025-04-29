@@ -19,10 +19,7 @@ function loadStickersFromStorage() {
 // Load existing stickers on page load
 window.addEventListener('load', () => {
   console.log('Loading saved stickers...');
-  const savedStickers = loadStickersFromStorage();
-  savedStickers.forEach(sticker => {
-    addSticky(sticker, false); // false means don't save to storage
-  });
+  refreshStickerDisplay();
 });
 
 // Function to categorize items using OpenAI API - reusing from sticker.js
@@ -66,14 +63,41 @@ async function categorizeSticker(title) {
   }
 }
 
-// Function to add a sticky note - reusing from sticker.js with modifications
-async function addSticky({title, expDate, quantity, color = "#fffef5", category = null}, shouldSave = true) {
+// Function to delete a sticker by its index
+function deleteSticker(index) {
+  // Get current stickers from localStorage
+  const stickers = loadStickersFromStorage();
+  
+  // Remove the sticker at the specified index
+  stickers.splice(index, 1);
+  
+  // Save the updated stickers array back to localStorage
+  saveStickersToStorage(stickers);
+  
+  // Refresh the display
+  refreshStickerDisplay();
+}
+
+// Function to refresh the sticker display
+function refreshStickerDisplay() {
+  // Clear the current stickers
+  stickyBoard.innerHTML = '';
+  
+  // Reload stickers from localStorage and display them
+  const savedStickers = loadStickersFromStorage();
+  savedStickers.forEach((sticker, index) => {
+    addSticky(sticker, false, index); // false means don't save to storage again
+  });
+}
+
+// Updated function to add a sticky note with delete button
+async function addSticky({title, expDate, quantity, color = "#fffef5", category = null}, shouldSave = true, index = null) {
   if (!quantity) {
     quantity = "1";
   }
 
   // If category not provided, use OpenAI to categorize
-  if (!category) {
+  if (!category && shouldSave) {
     category = await categorizeSticker(title);
   }
   
@@ -81,16 +105,34 @@ async function addSticky({title, expDate, quantity, color = "#fffef5", category 
   note.className = "sticky";
   note.style.backgroundColor = color;
 
+  // Add delete button
+  const deleteBtn = document.createElement("button");
+  deleteBtn.className = "delete-btn";
+  deleteBtn.innerHTML = "×"; // × is the multiplication sign, looks like an X
+  deleteBtn.title = "Delete this item";
+  
+  // If index is null (new item), we'll need to get its future index
+  const currentIndex = index !== null ? index : loadStickersFromStorage().length;
+  
+  // Add click event to delete button
+  deleteBtn.addEventListener("click", (event) => {
+    event.stopPropagation(); // Prevent event bubbling
+    deleteSticker(currentIndex);
+  });
+
   note.innerHTML = `
     <h4 class="sticky-title">${title}</h4>
 
     <div class="sticky-meta">
       <p>Expires:<br><strong>${expDate}</strong></p>
       <p>Quantity:<br><strong>${quantity}</strong></p>
-      <p>Category:<br><strong>${category}</strong></p>
+      <p>Category:<br><strong>${category || 'Not categorized'}</strong></p>
     </div>
   `;
-
+  
+  // Append the delete button to the note
+  note.appendChild(deleteBtn);
+  
   stickyBoard.appendChild(note);
 
   // Only save to localStorage if shouldSave is true

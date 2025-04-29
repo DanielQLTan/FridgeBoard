@@ -19,10 +19,7 @@ function loadStickersFromStorage() {
 // Load existing stickers on page load
 window.addEventListener('load', () => {
   console.log('Loading saved stickers...');
-  const savedStickers = loadStickersFromStorage();
-  savedStickers.forEach(sticker => {
-    addSticky(sticker, false); // false means don't save to storage
-  });
+  refreshStickerDisplay();
 });
 
 async function categorizeSticker(title) {
@@ -65,54 +62,105 @@ async function categorizeSticker(title) {
     }
 }
 
-async function addSticky({title, expDate, quantity, color = "#fffef5"}, shouldSave = true) {
-    if (!quantity){
-        quantity = "1";
-    }
-
-    if (!expDate) {
-        const today = new Date().toISOString().slice(0, 10);
-        const response = await fetch(
-            'https://noggin.rea.gent/xerothermic-moose-3116',
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: 'Bearer rg_v1_reh5iudjwrz2ffd7raq78q88mp3qkka67xql_ngk',
-              },
-              body: JSON.stringify({
-                "item": title,
-                "startDate": today,
-              }),
-            }
-          ).then(response => response.text());
-        expDate = response.trim() + " (Suggested)";
-    }
-    
-    const note = document.createElement("div");
-    note.className = "sticky";
-    note.style.backgroundColor = color;
-
-    note.innerHTML = `
-      <h4 class="sticky-title">${title}</h4>
+// Function to delete a sticker by its index
+function deleteSticker(index) {
+  // Get current stickers from localStorage
+  const stickers = loadStickersFromStorage();
   
-      <div class="sticky-meta">
-        <p>Expires:<br><strong>${expDate}</strong></p>
-        <p>Quantity:<br><strong>${quantity}</strong></p>
-      </div>
-    `;
+  // Remove the sticker at the specified index
+  stickers.splice(index, 1);
   
-    stickyBoard.appendChild(note);
+  // Save the updated stickers array back to localStorage
+  saveStickersToStorage(stickers);
+  
+  // Refresh the display
+  refreshStickerDisplay();
+}
 
-    const category = await categorizeSticker(title);
+// Function to refresh the sticker display
+function refreshStickerDisplay() {
+  // Clear the current stickers
+  stickyBoard.innerHTML = '';
+  
+  // Reload stickers from localStorage and display them
+  const savedStickers = loadStickersFromStorage();
+  savedStickers.forEach((sticker, index) => {
+    addSticky(sticker, false, index); // false means don't save to storage again
+  });
+}
 
-    // Only save to localStorage if shouldSave is true
-    if (shouldSave) {
-      console.log('Adding new sticker to storage:', {title, expDate, quantity, color, category});
-      const stickers = loadStickersFromStorage();
-      stickers.push({title, expDate, quantity, color, category});
-      saveStickersToStorage(stickers);
-    }
+// Updated function to add a sticky note with delete button
+async function addSticky({title, expDate, quantity, color = "#fffef5", category = null}, shouldSave = true, index = null) {
+  if (!quantity) {
+    quantity = "1";
+  }
+
+  // Get expiration date if not provided
+  if (!expDate && shouldSave) {
+    const today = new Date().toISOString().slice(0, 10);
+    const response = await fetch(
+      'https://noggin.rea.gent/xerothermic-moose-3116',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer rg_v1_reh5iudjwrz2ffd7raq78q88mp3qkka67xql_ngk',
+        },
+        body: JSON.stringify({
+          "item": title,
+          "startDate": today,
+        }),
+      }
+    ).then(response => response.text());
+    expDate = response.trim() + " (Suggested)";
+  }
+  
+  // If category not provided, use OpenAI to categorize
+  if (!category && shouldSave) {
+    category = await categorizeSticker(title);
+  }
+  
+  const note = document.createElement("div");
+  note.className = "sticky";
+  note.style.backgroundColor = color;
+
+  // Add delete button
+  const deleteBtn = document.createElement("button");
+  deleteBtn.className = "delete-btn";
+  deleteBtn.innerHTML = "×"; // × is the multiplication sign, looks like an X
+  deleteBtn.title = "Delete this item";
+  
+  // If index is null (new item), we'll need to get its future index
+  const currentIndex = index !== null ? index : loadStickersFromStorage().length;
+  
+  // Add click event to delete button
+  deleteBtn.addEventListener("click", (event) => {
+    event.stopPropagation(); // Prevent event bubbling
+    deleteSticker(currentIndex);
+  });
+
+  note.innerHTML = `
+    <h4 class="sticky-title">${title}</h4>
+
+    <div class="sticky-meta">
+      <p>Expires:<br><strong>${expDate}</strong></p>
+      <p>Quantity:<br><strong>${quantity}</strong></p>
+      <p>Category:<br><strong>${category || 'Not categorized'}</strong></p>
+    </div>
+  `;
+  
+  // Append the delete button to the note
+  note.appendChild(deleteBtn);
+  
+  stickyBoard.appendChild(note);
+
+  // Only save to localStorage if shouldSave is true
+  if (shouldSave) {
+    console.log('Adding new sticker to storage:', {title, expDate, quantity, color, category});
+    const stickers = loadStickersFromStorage();
+    stickers.push({title, expDate, quantity, color, category});
+    saveStickersToStorage(stickers);
+  }
 }
 
 const uploadSticker = document.querySelector(".upload-sticker");
