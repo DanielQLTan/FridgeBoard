@@ -6,19 +6,6 @@ const container = document.createElement('div');
 container.className = 'container mt-4';
 document.body.appendChild(container);
 
-// Category background colors
-const categoryColors = {
-  'Vegetables': '#e8f5e9', // Light green
-  'Fruits': '#fff8e1',     // Light yellow
-  'Meats': '#ffebee',      // Light pink
-  'Dairy': '#e3f2fd',      // Light blue
-  'Eggs': '#fff3e0',       // Light orange
-  'Seafood': '#e0f7fa',    // Light cyan
-  'Drinks': '#e8eaf6',     // Light indigo
-  'Sauces': '#fce4ec',     // Light pink
-  'Other': '#f5f5f5'       // Light grey
-};
-
 function loadCategorizedStickers() {
   const stickersData = localStorage.getItem('stickers');
   return stickersData ? JSON.parse(stickersData) : [];
@@ -108,25 +95,5 @@ function displayStickersByCategory() {
   });
 }
 
-// Add some CSS to the page
-function addStyles() {
-  const style = document.createElement('style');
-  style.textContent = `
-    body {
-      background-color: #f8f9fa;
-    }
-    .card {
-      transition: transform 0.2s;
-    }
-    .card:hover {
-      transform: translateY(-5px);
-    }
-  `;
-  document.head.appendChild(style);
-}
-
 // Initialize
-window.addEventListener('load', () => {
-  addStyles();
-  displayStickersByCategory();
-});
+window.addEventListener('load', displayStickersByCategory);
