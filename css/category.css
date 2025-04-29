@@ -1,3 +1,67 @@
+/* Basic styling */
 p {
 	color: green;
+}
+
+body {
+  background-color: #f8f9fa;
+}
+
+/* Category section styling */
+.category-section {
+  margin-bottom: 3rem;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+}
+
+/* Category-specific background colors */
+.category-vegetables { background-color: #e8f5e9; }
+.category-fruits { background-color: #fff8e1; }
+.category-meats { background-color: #ffebee; }
+.category-dairy { background-color: #e3f2fd; }
+.category-eggs { background-color: #fff3e0; }
+.category-seafood { background-color: #e0f7fa; }
+.category-drinks { background-color: #e8eaf6; }
+.category-sauces { background-color: #fce4ec; }
+.category-other { background-color: #f5f5f5; }
+
+/* Category header */
+.category-header {
+  margin-bottom: 1rem;
+  font-size: 1.75rem;
+}
+
+/* Card grid */
+.card-grid {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+/* Item card styling */
+.item-card {
+  width: 150px;
+  margin: 0.5rem;
+  background-color: white;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  border-radius: 0.25rem;
+  transition: transform 0.2s;
+}
+
+.item-card:hover {
+  transform: translateY(-5px);
+}
+
+.item-card-body {
+  padding: 1rem;
+}
+
+.item-name {
+  font-size: 0.9rem;
+  font-weight: bold;
+  margin-bottom: 0.25rem;
+}
+
+.item-date {
+  font-size: 0.8rem;
+  color: #6c757d;
 }
