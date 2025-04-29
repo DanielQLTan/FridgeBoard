@@ -2,6 +2,8 @@ const p = document.querySelector("p");
 const stickyBoard = document.getElementById("sticky-board");
 const addItemForm = document.getElementById("add-item-form");
 
+console.log("============= ADD ITEM JS LOADED =============");
+
 // Import the API key from config
 import { OPENAI_API_KEY } from './config.js';
 

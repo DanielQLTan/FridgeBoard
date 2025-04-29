@@ -214,4 +214,4 @@ window.checkStorage = function() {
   console.log('Current localStorage content:', localStorage.getItem('stickers'));
 }
 
-console.log("loaded stickers");
+console.log("============= STICKER JS LOADED =============");
