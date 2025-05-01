@@ -304,7 +304,7 @@ function refreshStickerDisplay(useGridLayout = false) {
     arrangeCardsInGrid(savedStickers, cardContainer);
   } else {
     // Create with saved positions
-    savedStickers.forEach((sticker, index) => {
+  savedStickers.forEach((sticker, index) => {
       createDraggableCard(sticker, index, cardContainer);
     });
   }
@@ -504,6 +504,136 @@ function saveCardPosition(index, left, top) {
   }
 }
 
+// Find an empty position for a new card
+function findEmptyPosition(existingStickers) {
+  const cardWidth = 200;
+  const cardHeight = 240;
+  const margin = 30; // Increased margin for better separation
+  
+  // Initialize with positions that are definitely empty
+  const initialPositions = [
+    { x: 50, y: 50 },
+    { x: 300, y: 50 },
+    { x: 550, y: 50 },
+    { x: 50, y: 300 },
+    { x: 300, y: 300 },
+    { x: 550, y: 300 },
+    { x: 50, y: 550 },
+    { x: 300, y: 550 },
+    { x: 550, y: 550 }
+  ];
+  
+  // Check if any of these positions are far enough from existing cards
+  for (const position of initialPositions) {
+    let isFarEnough = true;
+    
+    for (const sticker of existingStickers) {
+      if (sticker.posX === undefined || sticker.posY === undefined) continue;
+      
+      // Check if this position is too close to this sticker
+      // Using a more generous threshold to avoid overlapping
+      const horizontalOverlap = Math.abs(position.x - sticker.posX) < (cardWidth + margin);
+      const verticalOverlap = Math.abs(position.y - sticker.posY) < (cardHeight + margin);
+      
+      if (horizontalOverlap && verticalOverlap) {
+        isFarEnough = false;
+        break;
+      }
+    }
+    
+    if (isFarEnough) {
+      console.log(`Found empty position at (${position.x}, ${position.y})`);
+      return position;
+    }
+  }
+  
+  // If none of the fixed positions work, try a grid approach for more options
+  const viewport = {
+    width: window.innerWidth - 100,
+    height: window.innerHeight - 100
+  };
+  
+  const columns = Math.floor(viewport.width / (cardWidth + margin));
+  const rows = Math.floor(viewport.height / (cardHeight + margin));
+  
+  // Create a grid of potential positions
+  const grid = [];
+  for (let row = 0; row < rows; row++) {
+    for (let col = 0; col < columns; col++) {
+      grid.push({
+        x: col * (cardWidth + margin) + 50,
+        y: row * (cardHeight + margin) + 50,
+        occupied: false
+      });
+    }
+  }
+  
+  // Mark positions as occupied
+  for (const position of grid) {
+    for (const sticker of existingStickers) {
+      if (sticker.posX === undefined || sticker.posY === undefined) continue;
+      
+      const horizontalOverlap = Math.abs(position.x - sticker.posX) < (cardWidth + margin);
+      const verticalOverlap = Math.abs(position.y - sticker.posY) < (cardHeight + margin);
+      
+      if (horizontalOverlap && verticalOverlap) {
+        position.occupied = true;
+        break;
+      }
+    }
+  }
+  
+  // Filter out occupied positions
+  const emptyPositions = grid.filter(pos => !pos.occupied);
+  
+  // If we have empty positions, pick a random one
+  if (emptyPositions.length > 0) {
+    const randomIndex = Math.floor(Math.random() * emptyPositions.length);
+    console.log(`Found grid position at (${emptyPositions[randomIndex].x}, ${emptyPositions[randomIndex].y})`);
+    return {
+      x: emptyPositions[randomIndex].x,
+      y: emptyPositions[randomIndex].y
+    };
+  }
+  
+  // As a last resort, generate a position that's at least not directly on top of others
+  let attempts = 0;
+  const maxAttempts = 20;
+  
+  while (attempts < maxAttempts) {
+    attempts++;
+    
+    const randomX = Math.random() * (viewport.width - cardWidth) + 50;
+    const randomY = Math.random() * (viewport.height - cardHeight) + 50;
+    
+    let isFarEnough = true;
+    
+    for (const sticker of existingStickers) {
+      if (sticker.posX === undefined || sticker.posY === undefined) continue;
+      
+      const horizontalOverlap = Math.abs(randomX - sticker.posX) < (cardWidth + margin/2);
+      const verticalOverlap = Math.abs(randomY - sticker.posY) < (cardHeight + margin/2);
+      
+      if (horizontalOverlap && verticalOverlap) {
+        isFarEnough = false;
+        break;
+      }
+    }
+    
+    if (isFarEnough) {
+      console.log(`Found random position at (${randomX}, ${randomY}) after ${attempts} attempts`);
+      return { x: randomX, y: randomY };
+    }
+  }
+  
+  // If all else fails, just return a completely random position
+  console.log('Could not find a non-overlapping position, using fallback random position');
+  return {
+    x: Math.random() * (viewport.width - cardWidth) + 50,
+    y: Math.random() * (viewport.height - cardHeight) + 50
+  };
+}
+
 // Updated function to add a sticky note with position data
 async function addSticky({title, expDate, quantity, color = "#fffef5", category = null, posX = null, posY = null}, shouldSave = true, index = null) {
   if (!quantity) {
@@ -539,18 +669,19 @@ async function addSticky({title, expDate, quantity, color = "#fffef5", category 
     console.log(`Using provided category "${category}" or categorization skipped (shouldSave=${shouldSave})`);
   }
 
-  // Set default random position if not provided
-  if (posX === null) {
-    posX = Math.random() * (window.innerWidth - 350) + 50;
-  }
-  if (posY === null) {
-    posY = Math.random() * 400 + 50;
-  }
-
   // Only save to localStorage if shouldSave is true
   if (shouldSave) {
-    console.log('Adding new sticker to storage:', {title, expDate, quantity, color, category, posX, posY});
+    // Load existing stickers
     const stickers = loadStickersFromStorage();
+    
+    // Find an empty position for the new sticker if not provided
+    if (posX === null || posY === null) {
+      const emptyPos = findEmptyPosition(stickers);
+      posX = emptyPos.x;
+      posY = emptyPos.y;
+    }
+    
+    console.log('Adding new sticker to storage:', {title, expDate, quantity, color, category, posX, posY});
     stickers.push({title, expDate, quantity, color, category, posX, posY});
     saveStickersToStorage(stickers);
     
