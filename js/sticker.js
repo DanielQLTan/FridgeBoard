@@ -84,11 +84,59 @@ function refreshStickerDisplay() {
   // Clear the current stickers
   stickyBoard.innerHTML = '';
   
+  // Create card grid container
+  const cardGrid = document.createElement('div');
+  cardGrid.className = 'card-grid';
+  
   // Reload stickers from localStorage and display them
   const savedStickers = loadStickersFromStorage();
+  
+  if (savedStickers.length === 0) {
+    const emptyMessage = document.createElement('p');
+    emptyMessage.textContent = 'No items found. Add items using the form above.';
+    emptyMessage.className = 'text-muted text-center my-4';
+    stickyBoard.appendChild(emptyMessage);
+    return;
+  }
+  
   savedStickers.forEach((sticker, index) => {
-    addSticky(sticker, false, index); // false means don't save to storage again
+    // Create card for each item (matching the structure in category.js)
+    const card = document.createElement('div');
+    card.className = 'item-card';
+    
+    const cardBody = document.createElement('div');
+    cardBody.className = 'item-card-body';
+    
+    const itemName = document.createElement('p');
+    itemName.className = 'item-name';
+    itemName.textContent = sticker.title || 'Untitled';
+    
+    const expireDate = document.createElement('p');
+    expireDate.className = 'item-date';
+    expireDate.textContent = sticker.expDate || 'No expiration date';
+    
+    // Create delete button
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'card-delete-btn';
+    deleteBtn.innerHTML = '×';
+    deleteBtn.title = 'Delete this item';
+    
+    // Add delete functionality
+    deleteBtn.addEventListener('click', (event) => {
+      event.stopPropagation();
+      deleteSticker(index);
+    });
+    
+    // Assemble card (matching structure from category.js)
+    cardBody.appendChild(itemName);
+    cardBody.appendChild(expireDate);
+    cardBody.appendChild(deleteBtn);
+    
+    card.appendChild(cardBody);
+    cardGrid.appendChild(card);
   });
+  
+  stickyBoard.appendChild(cardGrid);
 }
 
 // Updated function to add a sticky note with delete button
@@ -121,40 +169,6 @@ async function addSticky({title, expDate, quantity, color = "#fffef5", category 
   if (!category && shouldSave) {
     category = await categorizeSticker(title);
   }
-  
-  const note = document.createElement("div");
-  note.className = "sticky";
-  note.style.backgroundColor = color;
-
-  // Add delete button
-  const deleteBtn = document.createElement("button");
-  deleteBtn.className = "delete-btn";
-  deleteBtn.innerHTML = "×"; // × is the multiplication sign, looks like an X
-  deleteBtn.title = "Delete this item";
-  
-  // If index is null (new item), we'll need to get its future index
-  const currentIndex = index !== null ? index : loadStickersFromStorage().length;
-  
-  // Add click event to delete button
-  deleteBtn.addEventListener("click", (event) => {
-    event.stopPropagation(); // Prevent event bubbling
-    deleteSticker(currentIndex);
-  });
-
-  note.innerHTML = `
-    <h4 class="sticky-title">${title}</h4>
-
-    <div class="sticky-meta">
-      <p>Expires:<br><strong>${expDate}</strong></p>
-      <p>Quantity:<br><strong>${quantity}</strong></p>
-      <p>Category:<br><strong>${category || 'Not categorized'}</strong></p>
-    </div>
-  `;
-  
-  // Append the delete button to the note
-  note.appendChild(deleteBtn);
-  
-  stickyBoard.appendChild(note);
 
   // Only save to localStorage if shouldSave is true
   if (shouldSave) {
@@ -162,6 +176,9 @@ async function addSticky({title, expDate, quantity, color = "#fffef5", category 
     const stickers = loadStickersFromStorage();
     stickers.push({title, expDate, quantity, color, category});
     saveStickersToStorage(stickers);
+    
+    // Refresh the display to show the new item
+    refreshStickerDisplay();
   }
 }
 

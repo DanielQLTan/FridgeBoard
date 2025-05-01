@@ -1,14 +1,27 @@
 const p = document.querySelector("p");
 console.log("loaded categories");
 
-// Create main container for categories
-const container = document.createElement('div');
-container.className = 'container mt-4';
-document.body.appendChild(container);
+// Use the existing container
+const container = document.getElementById('category-container');
 
 function loadCategorizedStickers() {
   const stickersData = localStorage.getItem('stickers');
   return stickersData ? JSON.parse(stickersData) : [];
+}
+
+// Function to delete a sticker by its index
+function deleteSticker(index) {
+  // Get current stickers from localStorage
+  const stickers = loadCategorizedStickers();
+  
+  // Remove the sticker at the specified index
+  stickers.splice(index, 1);
+  
+  // Save the updated stickers array back to localStorage
+  localStorage.setItem('stickers', JSON.stringify(stickers));
+  
+  // Refresh the display
+  displayStickersByCategory();
 }
 
 function displayStickersByCategory() {
@@ -68,8 +81,18 @@ function displayStickersByCategory() {
     const cardRow = document.createElement('div');
     cardRow.className = 'card-grid';
     
+    // Keep track of global index for delete functionality
+    let globalIndex = 0;
+    
     // Add items to the category
-    categories[category].forEach(sticker => {
+    categories[category].forEach((sticker, categoryIndex) => {
+      // Find the global index of this item in the original stickers array
+      globalIndex = stickers.findIndex(s => 
+        s.title === sticker.title && 
+        s.expDate === sticker.expDate &&
+        s.category === sticker.category
+      );
+      
       const card = document.createElement('div');
       card.className = 'item-card';
       
@@ -84,8 +107,23 @@ function displayStickersByCategory() {
       expireDate.className = 'item-date';
       expireDate.textContent = sticker.expDate;
       
+      // Create delete button
+      const deleteBtn = document.createElement('button');
+      deleteBtn.className = 'card-delete-btn';
+      deleteBtn.innerHTML = '×';
+      deleteBtn.title = 'Delete this item';
+      
+      // Add delete functionality
+      deleteBtn.addEventListener('click', (event) => {
+        event.stopPropagation();
+        // Use the global index for deleting
+        deleteSticker(globalIndex);
+      });
+      
       cardBody.appendChild(itemName);
       cardBody.appendChild(expireDate);
+      cardBody.appendChild(deleteBtn);
+      
       card.appendChild(cardBody);
       cardRow.appendChild(card);
     });

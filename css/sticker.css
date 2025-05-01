@@ -11,8 +11,9 @@ p {
 	  align-items: center;
 	  gap: 1rem;
 	}
-  }
+}
 
+/* Legacy sticky styles for backward compatibility */
 .sticky {
 	position: relative;
 	border: 1px solid #ccc;

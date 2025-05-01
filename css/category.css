@@ -7,6 +7,8 @@ body {
   background-color: #f8f9fa;
 }
 
+/* Note: Card and category styles moved to shared cards.css file */
+
 /* Category section styling */
 .category-section {
   margin-bottom: 3rem;
