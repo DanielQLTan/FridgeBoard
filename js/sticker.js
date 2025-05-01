@@ -4,6 +4,191 @@ const p = document.querySelector("p");
 
 const stickyBoard = document.getElementById("sticky-board");
 
+// Modal elements
+const modal = document.getElementById('handwriting-modal');
+const addItemBtn = document.getElementById('add-item-btn');
+const closeModalBtn = document.getElementById('close-modal-btn');
+const addItemSubmit = document.getElementById('add-item-submit');
+
+// Canvas elements
+const itemCanvas = document.getElementById('item-canvas');
+const dateCanvas = document.getElementById('date-canvas');
+const quantityCanvas = document.getElementById('quantity-canvas');
+
+// Drawing contexts
+const itemCtx = itemCanvas.getContext('2d');
+const dateCtx = dateCanvas.getContext('2d');
+const quantityCtx = quantityCanvas.getContext('2d');
+
+// Drawing state
+let isDrawing = false;
+let currentCanvas = null;
+let currentContext = null;
+
+// Setup handwriting functionality
+function setupHandwriting() {
+  // Initialize all canvases
+  [itemCanvas, dateCanvas, quantityCanvas].forEach(canvas => {
+    const ctx = canvas.getContext('2d');
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = 'black';
+    
+    // Clear canvas with white background
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Mouse events
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mouseout', stopDrawing);
+    
+    // Touch events for mobile
+    canvas.addEventListener('touchstart', startDrawingTouch);
+    canvas.addEventListener('touchmove', drawTouch);
+    canvas.addEventListener('touchend', stopDrawing);
+  });
+}
+
+// Drawing functions
+function startDrawing(e) {
+  isDrawing = true;
+  currentCanvas = e.target;
+  currentContext = currentCanvas.getContext('2d');
+  draw(e);
+}
+
+function startDrawingTouch(e) {
+  e.preventDefault();
+  isDrawing = true;
+  currentCanvas = e.target;
+  currentContext = currentCanvas.getContext('2d');
+  const touch = e.touches[0];
+  const mouseEvent = new MouseEvent('mousedown', {
+    clientX: touch.clientX,
+    clientY: touch.clientY
+  });
+  currentCanvas.dispatchEvent(mouseEvent);
+}
+
+function draw(e) {
+  if (!isDrawing) return;
+  
+  const rect = currentCanvas.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  
+  currentContext.lineTo(x, y);
+  currentContext.stroke();
+  currentContext.beginPath();
+  currentContext.moveTo(x, y);
+}
+
+function drawTouch(e) {
+  e.preventDefault();
+  const touch = e.touches[0];
+  const mouseEvent = new MouseEvent('mousemove', {
+    clientX: touch.clientX,
+    clientY: touch.clientY
+  });
+  currentCanvas.dispatchEvent(mouseEvent);
+}
+
+function stopDrawing() {
+  if (isDrawing) {
+    isDrawing = false;
+    currentContext.beginPath();
+  }
+}
+
+// Function to clear all canvases
+function clearCanvases() {
+  [itemCtx, dateCtx, quantityCtx].forEach(ctx => {
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.beginPath();
+  });
+}
+
+// Function to get dataURL from canvas
+function getCanvasDataURL(canvas) {
+  return canvas.toDataURL('image/png');
+}
+
+// Modal event listeners
+addItemBtn.addEventListener('click', function() {
+  // Show modal
+  modal.style.display = 'flex';
+  
+  // Clear canvases
+  clearCanvases();
+  
+  // Setup handwriting
+  setupHandwriting();
+});
+
+closeModalBtn.addEventListener('click', function() {
+  modal.style.display = 'none';
+});
+
+// Submit handwritten input
+addItemSubmit.addEventListener('click', async function() {
+  // Show loading state
+  addItemSubmit.disabled = true;
+  addItemSubmit.textContent = 'Processing...';
+  
+  try {
+    // Get data URLs from canvases
+    const itemDataUrl = getCanvasDataURL(itemCanvas);
+    const dateDataUrl = getCanvasDataURL(dateCanvas);
+    const quantityDataUrl = getCanvasDataURL(quantityCanvas);
+    
+    // Process handwritten item (similar to sticker processing)
+    const itemResponse = await processHandwriting(itemDataUrl, "item");
+    const dateResponse = await processHandwriting(dateDataUrl, "date");
+    const quantityResponse = await processHandwriting(quantityDataUrl, "quantity");
+    
+    // Add the item
+    await addSticky({
+      title: itemResponse.trim(),
+      expDate: dateResponse.trim(),
+      quantity: quantityResponse.trim()
+    }, true);
+    
+    // Close modal
+    modal.style.display = 'none';
+  } catch (error) {
+    console.error('Error processing handwritten input:', error);
+    alert('Error processing handwritten input. Please try again.');
+  } finally {
+    // Reset button
+    addItemSubmit.disabled = false;
+    addItemSubmit.textContent = 'Add item';
+  }
+});
+
+// Process handwritten text using the same API as stickers
+async function processHandwriting(dataUrl, type) {
+  // Use the same API endpoint as for stickers
+  const response = await fetch(
+    'https://noggin.rea.gent/wily-starfish-4015',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer rg_v1_f19t3fxicscspdee1x5rk3i9frr873wzsb9j_ngk',
+      },
+      body: JSON.stringify({
+        "sticker": dataUrl,
+        "type": type
+      }),
+    }
+  ).then(response => response.text());
+  
+  return response.trim();
+}
+
 // Add event listener for the Add New Item button
 document.getElementById('add-item-btn').addEventListener('click', function() {
   console.log('Add New Item button clicked');

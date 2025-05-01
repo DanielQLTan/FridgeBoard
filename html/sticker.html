@@ -13,7 +13,7 @@
 <body>
 	<div class="container mt-4">
 		<h1>Stickers</h1>
-		
+		<p>This is the page for stickers.</p>
 
 		<!-- Add New Item button -->
 		<button class="action-button" id="add-item-btn">Add New Item</button>
@@ -26,6 +26,36 @@
 		</div>
 
 		<section id="sticky-board"></section>
+	</div>
+
+	<!-- Handwriting Modal -->
+	<div id="handwriting-modal" class="modal-overlay">
+		<div class="modal-content">
+			<button id="close-modal-btn" class="close-btn">&times;</button>
+			
+			<div class="input-section">
+				<label>Item:</label>
+				<div id="item-canvas-container" class="canvas-container">
+					<canvas id="item-canvas" width="500" height="100"></canvas>
+				</div>
+			</div>
+			
+			<div class="input-section">
+				<label>Expiration Date:</label>
+				<div id="date-canvas-container" class="canvas-container">
+					<canvas id="date-canvas" width="500" height="100"></canvas>
+				</div>
+			</div>
+			
+			<div class="input-section">
+				<label>Quantity:</label>
+				<div id="quantity-canvas-container" class="canvas-container">
+					<canvas id="quantity-canvas" width="500" height="100"></canvas>
+				</div>
+			</div>
+			
+			<button id="add-item-submit" class="add-item-button">Add item</button>
+		</div>
 	</div>
 
 	<!-- Navigation Bar -->
