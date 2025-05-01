@@ -1,8 +1,7 @@
-// This file loads API keys from the .env file or environment variables
-// This should be included in .gitignore to avoid committing API keys
+// This file contains API keys and should be included in .gitignore
 
-// OpenAI API key - replace with your actual key
-const OPENAI_API_KEY = 'your-open-ai-api-key';
+// OpenAI API key
+const OPENAI_API_KEY = '';
 
 // Export the API key for use in other files
 export { OPENAI_API_KEY }; 

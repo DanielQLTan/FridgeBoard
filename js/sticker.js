@@ -217,6 +217,7 @@ window.addEventListener('load', () => {
 });
 
 async function categorizeSticker(title) {
+  console.log(`Attempting to categorize: "${title}"`);
   try {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -225,7 +226,7 @@ async function categorizeSticker(title) {
         'Authorization': `Bearer ${OPENAI_API_KEY}`
       },
       body: JSON.stringify({
-        model: "gpt-4o-mini",
+        model: "gpt-4o",
         messages: [
           {
             role: "system",
@@ -237,21 +238,25 @@ async function categorizeSticker(title) {
           }
         ],
         max_tokens: 10,
-        temperature: 0.3
+        temperature: 0.2
       })
     });
 
     if (!response.ok) {
-      console.error('Error getting category from API:', await response.text());
+      const errorText = await response.text();
+      console.error('Error getting category from API:', errorText);
+      console.error('Response status:', response.status);
       return 'Other'; // Fallback category
     }
 
     const data = await response.json();
+    console.log('API response data:', data);
     const category = data.choices[0].message.content.trim();
-    console.log(`Categorized "${title}" as "${category}"`);
+    console.log(`Successfully categorized "${title}" as "${category}"`);
     return category;
   } catch (error) {
     console.error('Error in categorization:', error);
+    console.error('Error details:', error.message);
     return 'Other'; // Return Other if API fails
   }
 }
@@ -527,7 +532,11 @@ async function addSticky({title, expDate, quantity, color = "#fffef5", category 
   
   // If category not provided, use OpenAI to categorize
   if (!category && shouldSave) {
+    console.log(`Need to categorize item: "${title}"`);
     category = await categorizeSticker(title);
+    console.log(`Categorization result: "${category}"`);
+  } else {
+    console.log(`Using provided category "${category}" or categorization skipped (shouldSave=${shouldSave})`);
   }
 
   // Set default random position if not provided
