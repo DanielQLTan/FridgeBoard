@@ -4,6 +4,12 @@ const p = document.querySelector("p");
 
 const stickyBoard = document.getElementById("sticky-board");
 
+// Add event listener for the Add New Item button
+document.getElementById('add-item-btn').addEventListener('click', function() {
+  console.log('Add New Item button clicked');
+  // You can add functionality here in the future
+});
+
 // Function to save stickers to localStorage
 function saveStickersToStorage(stickers) {
   console.log('Saving stickers:', stickers);

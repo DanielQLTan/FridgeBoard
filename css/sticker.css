@@ -2,6 +2,34 @@ p {
 	color: red;
 }
 
+/* Action button styling */
+.action-button {
+  background-color: #D7FF9F;
+  border: none;
+  padding: 16px 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  display: inline-block;
+  text-decoration: none;
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+.action-button:hover {
+  background-color: #c8f087;
+  transform: translateY(-2px);
+  text-decoration: none;
+  color: #333;
+}
+
+.action-button:active {
+  transform: translateY(1px);
+}
+
 .upload-sticker {
 	margin-bottom: 2rem;
 
