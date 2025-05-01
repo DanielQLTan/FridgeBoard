@@ -1,16 +1,19 @@
+const p = document.querySelector("p");
+const stickyBoard = document.getElementById("sticky-board");
+const addItemForm = document.getElementById("add-item-form");
+
+console.log("============= ADD ITEM JS LOADED =============");
+
+// Import the API key from config
 import { OPENAI_API_KEY } from './config.js';
 
-const p = document.querySelector("p");
-
-const stickyBoard = document.getElementById("sticky-board");
-
-// Function to save stickers to localStorage
+// Function to save stickers to localStorage - reusing from sticker.js
 function saveStickersToStorage(stickers) {
   console.log('Saving stickers:', stickers);
   localStorage.setItem('stickers', JSON.stringify(stickers));
 }
 
-// Function to load stickers from localStorage
+// Function to load stickers from localStorage - reusing from sticker.js
 function loadStickersFromStorage() {
   const stickersData = localStorage.getItem('stickers');
   const stickers = stickersData ? JSON.parse(stickersData) : [];
@@ -24,6 +27,7 @@ window.addEventListener('load', () => {
   refreshStickerDisplay();
 });
 
+// Function to categorize items using OpenAI API - reusing from sticker.js
 async function categorizeSticker(title) {
   try {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -97,26 +101,6 @@ async function addSticky({title, expDate, quantity, color = "#fffef5", category 
     quantity = "1";
   }
 
-  // Get expiration date if not provided
-  if (!expDate && shouldSave) {
-    const today = new Date().toISOString().slice(0, 10);
-    const response = await fetch(
-      'https://noggin.rea.gent/xerothermic-moose-3116',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: 'Bearer rg_v1_reh5iudjwrz2ffd7raq78q88mp3qkka67xql_ngk',
-        },
-        body: JSON.stringify({
-          "item": title,
-          "startDate": today,
-        }),
-      }
-    ).then(response => response.text());
-    expDate = response.trim() + " (Suggested)";
-  }
-  
   // If category not provided, use OpenAI to categorize
   if (!category && shouldSave) {
     category = await categorizeSticker(title);
@@ -165,53 +149,27 @@ async function addSticky({title, expDate, quantity, color = "#fffef5", category 
   }
 }
 
-const uploadSticker = document.querySelector(".upload-sticker");
-const fileInput = uploadSticker.querySelector('input[type="file"]');
-const submitBtn = uploadSticker.querySelector('input[type="submit"]');
+// Handle form submission
+addItemForm.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  
+  const title = document.getElementById('itemName').value;
+  const expDate = document.getElementById('expirationDate').value;
+  const quantity = document.getElementById('quantity').value;
+  
+  // Format date to match sticker.js format if provided
+  let formattedDate = expDate ? new Date(expDate).toISOString().slice(0, 10) : '';
+  
+  // Add the item
+  await addSticky({
+    title,
+    expDate: formattedDate || 'Not specified',
+    quantity,
+    color: "#fffef5"
+  }, true);
+  
+  // Reset form
+  addItemForm.reset();
+});
 
-uploadSticker
-  .querySelector("form")
-  .addEventListener("submit", async (event) => {
-    event.preventDefault();
-
-    submitBtn.disabled = true;
-    submitBtn.value = "Processing...";
-
-    const file = fileInput.files[0];
-    const fileReader = new FileReader();
-    fileReader.onload = async (readEvent) => {
-      const dataUrl = readEvent.target.result;
-
-      const response = await fetch(
-          'https://noggin.rea.gent/wily-starfish-4015',
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: 'Bearer rg_v1_f19t3fxicscspdee1x5rk3i9frr873wzsb9j_ngk',
-            },
-            body: JSON.stringify({
-              "sticker": dataUrl,
-            }),
-          }
-        ).then(response => response.text());
-
-      const lines = response.trim().split("\n");
-      const [title, expDate, quantity] = lines.map(x => x.trim());
-
-      addSticky({title, expDate, quantity}, true); // true means save to storage
-
-      submitBtn.disabled = false;
-      submitBtn.value = "Scan Sticker";
-      fileInput.value = "";
-    };
-
-    fileReader.readAsDataURL(file);
-  });
-
-// Add a test function to check localStorage
-window.checkStorage = function() {
-  console.log('Current localStorage content:', localStorage.getItem('stickers'));
-}
-
-console.log("============= STICKER JS LOADED =============");
+console.log("loaded add-item page"); 
