@@ -9,6 +9,7 @@ const modal = document.getElementById('handwriting-modal');
 const addItemBtn = document.getElementById('add-item-btn');
 const closeModalBtn = document.getElementById('close-modal-btn');
 const addItemSubmit = document.getElementById('add-item-submit');
+const tidyUpBtn = document.getElementById('tidy-up-btn');
 
 // Canvas elements
 const itemCanvas = document.getElementById('item-canvas');
@@ -271,13 +272,15 @@ function deleteSticker(index) {
 }
 
 // Function to refresh the sticker display
-function refreshStickerDisplay() {
+function refreshStickerDisplay(useGridLayout = false) {
   // Clear the current stickers
   stickyBoard.innerHTML = '';
   
-  // Create card grid container
-  const cardGrid = document.createElement('div');
-  cardGrid.className = 'card-grid';
+  // Create card container - no longer using grid directly
+  const cardContainer = document.createElement('div');
+  cardContainer.className = 'card-container';
+  cardContainer.style.position = 'relative';
+  cardContainer.style.minHeight = '600px';
   
   // Reload stickers from localStorage and display them
   const savedStickers = loadStickersFromStorage();
@@ -290,48 +293,214 @@ function refreshStickerDisplay() {
     return;
   }
   
-  savedStickers.forEach((sticker, index) => {
-    // Create card for each item (matching the structure in category.js)
-    const card = document.createElement('div');
-    card.className = 'item-card';
-    
-    const cardBody = document.createElement('div');
-    cardBody.className = 'item-card-body';
-    
-    const itemName = document.createElement('p');
-    itemName.className = 'item-name';
-    itemName.textContent = sticker.title || 'Untitled';
-    
-    const expireDate = document.createElement('p');
-    expireDate.className = 'item-date';
-    expireDate.textContent = sticker.expDate || 'No expiration date';
-    
-    // Create delete button
-    const deleteBtn = document.createElement('button');
-    deleteBtn.className = 'card-delete-btn';
-    deleteBtn.innerHTML = '×';
-    deleteBtn.title = 'Delete this item';
-    
-    // Add delete functionality
-    deleteBtn.addEventListener('click', (event) => {
-      event.stopPropagation();
-      deleteSticker(index);
+  // Create cards in grid or free positions
+  if (useGridLayout) {
+    // Create in grid layout - reset all positions
+    arrangeCardsInGrid(savedStickers, cardContainer);
+  } else {
+    // Create with saved positions
+    savedStickers.forEach((sticker, index) => {
+      createDraggableCard(sticker, index, cardContainer);
     });
-    
-    // Assemble card (matching structure from category.js)
-    cardBody.appendChild(itemName);
-    cardBody.appendChild(expireDate);
-    cardBody.appendChild(deleteBtn);
-    
-    card.appendChild(cardBody);
-    cardGrid.appendChild(card);
-  });
+  }
   
-  stickyBoard.appendChild(cardGrid);
+  stickyBoard.appendChild(cardContainer);
 }
 
-// Updated function to add a sticky note with delete button
-async function addSticky({title, expDate, quantity, color = "#fffef5", category = null}, shouldSave = true, index = null) {
+// Function to arrange cards in a grid layout
+function arrangeCardsInGrid(stickers, container) {
+  const cardWidth = 200;
+  const cardHeight = 240;
+  const gapX = 20;
+  const gapY = 20;
+  const cardsPerRow = Math.floor((window.innerWidth - 100) / (cardWidth + gapX));
+  
+  stickers.forEach((sticker, index) => {
+    const row = Math.floor(index / cardsPerRow);
+    const col = index % cardsPerRow;
+    
+    const left = col * (cardWidth + gapX) + 10;
+    const top = row * (cardHeight + gapY) + 10;
+    
+    // Update sticker with new position
+    sticker.posX = left;
+    sticker.posY = top;
+    
+    // Create the card with updated position
+    createDraggableCard(sticker, index, container);
+  });
+  
+  // Save the updated positions to localStorage
+  saveStickersToStorage(stickers);
+}
+
+// Function to create a draggable card
+function createDraggableCard(sticker, index, container) {
+  // Create card for each item
+  const card = document.createElement('div');
+  card.className = 'item-card draggable';
+  card.style.position = 'absolute';
+  
+  // Set position from saved data or default
+  card.style.left = (sticker.posX !== undefined) ? `${sticker.posX}px` : '10px';
+  card.style.top = (sticker.posY !== undefined) ? `${sticker.posY}px` : '10px';
+  card.style.zIndex = 1;
+  
+  const cardBody = document.createElement('div');
+  cardBody.className = 'item-card-body';
+  
+  const itemName = document.createElement('p');
+  itemName.className = 'item-name';
+  itemName.textContent = sticker.title || 'Untitled';
+  
+  const expireDate = document.createElement('p');
+  expireDate.className = 'item-date';
+  expireDate.textContent = sticker.expDate || 'No expiration date';
+  
+  // Create delete button
+  const deleteBtn = document.createElement('button');
+  deleteBtn.className = 'card-delete-btn';
+  deleteBtn.innerHTML = '×';
+  deleteBtn.title = 'Delete this item';
+  
+  // Add delete functionality
+  deleteBtn.addEventListener('click', (event) => {
+    event.stopPropagation();
+    deleteSticker(index);
+  });
+  
+  // Add drag functionality
+  makeDraggable(card, index);
+  
+  // Assemble card
+  cardBody.appendChild(itemName);
+  cardBody.appendChild(expireDate);
+  cardBody.appendChild(deleteBtn);
+  
+  card.appendChild(cardBody);
+  container.appendChild(card);
+}
+
+// Function to make an element draggable
+function makeDraggable(element, stickerIndex) {
+  let initialX, initialY;
+  let initialMouseX, initialMouseY;
+  let isDragging = false;
+  
+  element.addEventListener('mousedown', dragMouseDown);
+  element.addEventListener('touchstart', dragTouchStart, { passive: false });
+  
+  function dragMouseDown(e) {
+    e.preventDefault();
+    
+    // Get initial positions
+    initialX = element.offsetLeft;
+    initialY = element.offsetTop;
+    initialMouseX = e.clientX;
+    initialMouseY = e.clientY;
+    
+    // Bring card to front when clicked
+    element.style.zIndex = 10;
+    
+    document.addEventListener('mouseup', closeDragElement);
+    document.addEventListener('mousemove', elementDrag);
+    
+    isDragging = false; // Reset flag
+  }
+  
+  function dragTouchStart(e) {
+    e.preventDefault();
+    const touch = e.touches[0];
+    
+    // Get initial positions
+    initialX = element.offsetLeft;
+    initialY = element.offsetTop;
+    initialMouseX = touch.clientX;
+    initialMouseY = touch.clientY;
+    
+    // Bring card to front when touched
+    element.style.zIndex = 10;
+    
+    document.addEventListener('touchend', closeTouchDragElement);
+    document.addEventListener('touchmove', elementTouchDrag, { passive: false });
+    
+    isDragging = false; // Reset flag
+  }
+  
+  function elementDrag(e) {
+    e.preventDefault();
+    isDragging = true;
+    
+    // Calculate how far the mouse has moved from its initial position
+    const deltaX = e.clientX - initialMouseX;
+    const deltaY = e.clientY - initialMouseY;
+    
+    // Apply that same delta to the card position
+    element.style.left = (initialX + deltaX) + "px";
+    element.style.top = (initialY + deltaY) + "px";
+  }
+  
+  function elementTouchDrag(e) {
+    e.preventDefault();
+    isDragging = true;
+    
+    const touch = e.touches[0];
+    
+    // Calculate how far the touch has moved from its initial position
+    const deltaX = touch.clientX - initialMouseX;
+    const deltaY = touch.clientY - initialMouseY;
+    
+    // Apply that same delta to the card position
+    element.style.left = (initialX + deltaX) + "px";
+    element.style.top = (initialY + deltaY) + "px";
+  }
+  
+  function closeDragElement() {
+    // Stop moving when mouse button is released
+    document.removeEventListener('mouseup', closeDragElement);
+    document.removeEventListener('mousemove', elementDrag);
+    
+    // Save position if actually dragged
+    if (isDragging) {
+      saveCardPosition(stickerIndex, element.offsetLeft, element.offsetTop);
+    }
+    
+    // Reset z-index to normal
+    setTimeout(() => {
+      element.style.zIndex = 1;
+    }, 200);
+  }
+  
+  function closeTouchDragElement() {
+    // Stop moving when touch ends
+    document.removeEventListener('touchend', closeTouchDragElement);
+    document.removeEventListener('touchmove', elementTouchDrag);
+    
+    // Save position if actually dragged
+    if (isDragging) {
+      saveCardPosition(stickerIndex, element.offsetLeft, element.offsetTop);
+    }
+    
+    // Reset z-index to normal
+    setTimeout(() => {
+      element.style.zIndex = 1;
+    }, 200);
+  }
+}
+
+// Function to save card position to localStorage
+function saveCardPosition(index, left, top) {
+  const stickers = loadStickersFromStorage();
+  
+  if (stickers[index]) {
+    stickers[index].posX = left;
+    stickers[index].posY = top;
+    saveStickersToStorage(stickers);
+  }
+}
+
+// Updated function to add a sticky note with position data
+async function addSticky({title, expDate, quantity, color = "#fffef5", category = null, posX = null, posY = null}, shouldSave = true, index = null) {
   if (!quantity) {
     quantity = "1";
   }
@@ -361,11 +530,19 @@ async function addSticky({title, expDate, quantity, color = "#fffef5", category 
     category = await categorizeSticker(title);
   }
 
+  // Set default random position if not provided
+  if (posX === null) {
+    posX = Math.random() * (window.innerWidth - 350) + 50;
+  }
+  if (posY === null) {
+    posY = Math.random() * 400 + 50;
+  }
+
   // Only save to localStorage if shouldSave is true
   if (shouldSave) {
-    console.log('Adding new sticker to storage:', {title, expDate, quantity, color, category});
+    console.log('Adding new sticker to storage:', {title, expDate, quantity, color, category, posX, posY});
     const stickers = loadStickersFromStorage();
-    stickers.push({title, expDate, quantity, color, category});
+    stickers.push({title, expDate, quantity, color, category, posX, posY});
     saveStickersToStorage(stickers);
     
     // Refresh the display to show the new item
@@ -421,5 +598,11 @@ uploadSticker
 window.checkStorage = function() {
   console.log('Current localStorage content:', localStorage.getItem('stickers'));
 }
+
+// Event listener for "Tidy Up" button
+tidyUpBtn.addEventListener('click', () => {
+  // Arrange all stickers in grid layout
+  refreshStickerDisplay(true);
+});
 
 console.log("============= STICKER JS LOADED =============");

@@ -2,6 +2,13 @@ p {
 	color: red;
 }
 
+/* Action buttons container */
+.action-buttons-container {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 1rem;
+}
+
 /* Action button styling */
 .action-button {
   background-color: #D7FF9F;
@@ -29,6 +36,37 @@ p {
 
 .action-button:active {
   transform: translateY(1px);
+}
+
+/* Tidy button styling */
+.tidy-button {
+  background-color: #7ED7F0;
+}
+
+.tidy-button:hover {
+  background-color: #5DC8E8;
+}
+
+/* Card container for draggable cards */
+.card-container {
+  position: relative;
+  min-height: 600px;
+  width: 100%;
+}
+
+/* Draggable card styling */
+.item-card.draggable {
+  cursor: grab;
+  transition: box-shadow 0.2s ease;
+  width: 180px;
+  position: absolute;
+  z-index: 1;
+}
+
+.item-card.draggable:active {
+  cursor: grabbing;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+  z-index: 10;
 }
 
 /* Modal styling */
