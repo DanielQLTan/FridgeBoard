@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>Stickers</title>
+	<title>Add Item</title>
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
 	<link rel="stylesheet" href="../main.css">
 	<link rel="stylesheet" href="../css/sticker.css">
@@ -11,22 +11,40 @@
 </head>
 <body>
 	<div class="container mt-4">
-		<h1>Stickers</h1>
-		<p>This is the page for stickers.</p>
-
-		<div class="upload-sticker mb-4">
-			<form>
-				<input type="file" name="file" class="form-control" />
-				<input type="submit" value="Scan Sticker" class="btn btn-primary" />
-			</form>
+		<h1>Add New Item</h1>
+		<div class="row">
+			<div class="col-md-6 offset-md-3">
+				<div class="card">
+					<div class="card-header">
+						<h3>Add New Item</h3>
+					</div>
+					<div class="card-body">
+						<form id="add-item-form">
+							<div class="mb-3">
+								<label for="itemName" class="form-label">Item Name</label>
+								<input type="text" class="form-control" id="itemName" required>
+							</div>
+							<div class="mb-3">
+								<label for="expirationDate" class="form-label">Expiration Date</label>
+								<input type="date" class="form-control" id="expirationDate">
+							</div>
+							<div class="mb-3">
+								<label for="quantity" class="form-label">Quantity</label>
+								<input type="number" class="form-control" id="quantity" value="1" min="1">
+							</div>
+							<button type="submit" class="btn btn-primary">Add Item</button>
+						</form>
+					</div>
+				</div>
+			</div>
 		</div>
-
-		<section id="sticky-board"></section>
 	</div>
+
+	<section id="sticky-board" class="container mt-4"></section>
 
 	<!-- Navigation Bar -->
 	<div class="navi-bar">
-		<a href="sticker.html" class="nav-item active">
+		<a href="sticker.html" class="nav-item">
 			<img class="nav-icon" src="../img/home.svg" alt="Home">
 			<div class="nav-text">Home</div>
 		</a>
@@ -42,13 +60,13 @@
 			<img class="nav-icon" src="../img/shopping-cart.svg" alt="Shopping">
 			<div class="nav-text">Shopping</div>
 		</a>
-		<a href="add-item.html" class="nav-item">
+		<a href="add-item.html" class="nav-item active">
 			<img class="nav-icon" src="../img/user.svg" alt="Testing">
 			<div class="nav-text">Testing</div>
 		</a>
 	</div>
 
-	<script src="../js/sticker.js" type="module"></script>
+	<script src="../js/add-item.js" type="module"></script>
 	<script src="../js/navbar.js"></script>
 </body>
-</html>
+</html> 
