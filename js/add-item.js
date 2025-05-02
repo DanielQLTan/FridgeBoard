@@ -95,8 +95,30 @@ function refreshStickerDisplay() {
   });
 }
 
+// Function to get a position that guarantees no overlap
+function getNewItemPosition() {
+  // Define upper left region boundaries
+  const region = {
+    minX: 20,
+    maxX: 250, // Upper left quadrant
+    minY: 20,
+    maxY: 250  // Upper left quadrant
+  };
+  
+  // Generate random position within the upper left region
+  const randomX = Math.floor(Math.random() * (region.maxX - region.minX)) + region.minX;
+  const randomY = Math.floor(Math.random() * (region.maxY - region.minY)) + region.minY;
+  
+  console.log(`Placing new item in upper left region at (${randomX}, ${randomY})`);
+  
+  return {
+    x: randomX,
+    y: randomY
+  };
+}
+
 // Updated function to add a sticky note with delete button
-async function addSticky({title, expDate, quantity, color = "#fffef5", category = null}, shouldSave = true, index = null) {
+async function addSticky({title, expDate, quantity, color = "#fffef5", category = null, posX = null, posY = null}, shouldSave = true, index = null) {
   if (!quantity) {
     quantity = "1";
   }
@@ -142,9 +164,17 @@ async function addSticky({title, expDate, quantity, color = "#fffef5", category 
 
   // Only save to localStorage if shouldSave is true
   if (shouldSave) {
-    console.log('Adding new sticker to storage:', {title, expDate, quantity, color, category});
+    // Get position if not provided
+    if (posX === null || posY === null) {
+      const newPosition = getNewItemPosition();
+      posX = newPosition.x;
+      posY = newPosition.y;
+    }
+    
+    console.log('Adding new sticker to storage:', {title, expDate, quantity, color, category, posX, posY});
     const stickers = loadStickersFromStorage();
-    stickers.push({title, expDate, quantity, color, category});
+    // Add isNew flag for new items
+    stickers.push({title, expDate, quantity, color, category, posX, posY, isNew: true});
     saveStickersToStorage(stickers);
   }
 }
@@ -160,12 +190,17 @@ addItemForm.addEventListener('submit', async (event) => {
   // Format date to match sticker.js format if provided
   let formattedDate = expDate ? new Date(expDate).toISOString().slice(0, 10) : '';
   
-  // Add the item
+  // Get a position in the upper left region
+  const position = getNewItemPosition();
+  
+  // Add the item with explicit position
   await addSticky({
     title,
     expDate: formattedDate || 'Not specified',
     quantity,
-    color: "#fffef5"
+    color: "#fffef5",
+    posX: position.x,
+    posY: position.y
   }, true);
   
   // Reset form

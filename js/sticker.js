@@ -26,6 +26,9 @@ let isDrawing = false;
 let currentCanvas = null;
 let currentContext = null;
 
+// Store last used position index
+let lastPositionIndex = -1;
+
 // Setup handwriting functionality
 function setupHandwriting() {
   // Initialize all canvases
@@ -318,7 +321,18 @@ function arrangeCardsInGrid(stickers, container) {
   const cardHeight = 240;
   const gapX = 20;
   const gapY = 20;
-  const cardsPerRow = Math.floor((window.innerWidth - 100) / (cardWidth + gapX));
+  const rightMargin = 30; // Additional margin to ensure cards stay within view
+  
+  // Calculate available width, accounting for a safe margin on right side
+  const availableWidth = window.innerWidth - rightMargin;
+  
+  // Ensure we leave enough space for at least 1 card plus margins
+  const safeWidth = Math.max(availableWidth - (cardWidth + gapX*2), cardWidth + gapX*2);
+  
+  // Calculate number of cards per row based on available width
+  const cardsPerRow = Math.floor(safeWidth / (cardWidth + gapX));
+  
+  console.log(`Grid layout: ${cardsPerRow} cards per row (window width: ${window.innerWidth}px)`);
   
   stickers.forEach((sticker, index) => {
     const row = Math.floor(index / cardsPerRow);
@@ -339,7 +353,7 @@ function arrangeCardsInGrid(stickers, container) {
   saveStickersToStorage(stickers);
 }
 
-// Function to create a draggable card
+// Updated function to create a draggable card with NEW indicator
 function createDraggableCard(sticker, index, container) {
   // Create card for each item
   const card = document.createElement('div');
@@ -374,6 +388,17 @@ function createDraggableCard(sticker, index, container) {
     deleteSticker(index);
   });
   
+  // Add NEW indicator if sticker is new
+  if (sticker.isNew) {
+    const newIndicator = document.createElement('div');
+    newIndicator.className = 'new-indicator';
+    newIndicator.textContent = 'NEW';
+    card.appendChild(newIndicator);
+    
+    // Add event listeners to remove NEW indicator on interaction
+    card.addEventListener('click', () => removeNewIndicator(index));
+  }
+  
   // Add drag functionality
   makeDraggable(card, index);
   
@@ -384,6 +409,28 @@ function createDraggableCard(sticker, index, container) {
   
   card.appendChild(cardBody);
   container.appendChild(card);
+}
+
+// Function to remove NEW indicator
+function removeNewIndicator(index) {
+  const stickers = loadStickersFromStorage();
+  if (stickers[index] && stickers[index].isNew) {
+    console.log(`Removing NEW indicator from sticker at index ${index}`);
+    stickers[index].isNew = false;
+    saveStickersToStorage(stickers);
+    
+    // Remove indicator from DOM
+    const newIndicators = document.querySelectorAll('.new-indicator');
+    if (newIndicators.length > 0) {
+      const cardElements = document.querySelectorAll('.item-card');
+      if (cardElements[index]) {
+        const indicator = cardElements[index].querySelector('.new-indicator');
+        if (indicator) {
+          indicator.remove();
+        }
+      }
+    }
+  }
 }
 
 // Function to make an element draggable
@@ -468,6 +515,8 @@ function makeDraggable(element, stickerIndex) {
     // Save position if actually dragged
     if (isDragging) {
       saveCardPosition(stickerIndex, element.offsetLeft, element.offsetTop);
+      // Remove NEW indicator when dragged
+      removeNewIndicator(stickerIndex);
     }
     
     // Reset z-index to normal
@@ -484,6 +533,8 @@ function makeDraggable(element, stickerIndex) {
     // Save position if actually dragged
     if (isDragging) {
       saveCardPosition(stickerIndex, element.offsetLeft, element.offsetTop);
+      // Remove NEW indicator when dragged
+      removeNewIndicator(stickerIndex);
     }
     
     // Reset z-index to normal
@@ -504,133 +555,25 @@ function saveCardPosition(index, left, top) {
   }
 }
 
-// Find an empty position for a new card
-function findEmptyPosition(existingStickers) {
-  const cardWidth = 200;
-  const cardHeight = 240;
-  const margin = 30; // Increased margin for better separation
-  
-  // Initialize with positions that are definitely empty
-  const initialPositions = [
-    { x: 50, y: 50 },
-    { x: 300, y: 50 },
-    { x: 550, y: 50 },
-    { x: 50, y: 300 },
-    { x: 300, y: 300 },
-    { x: 550, y: 300 },
-    { x: 50, y: 550 },
-    { x: 300, y: 550 },
-    { x: 550, y: 550 }
-  ];
-  
-  // Check if any of these positions are far enough from existing cards
-  for (const position of initialPositions) {
-    let isFarEnough = true;
-    
-    for (const sticker of existingStickers) {
-      if (sticker.posX === undefined || sticker.posY === undefined) continue;
-      
-      // Check if this position is too close to this sticker
-      // Using a more generous threshold to avoid overlapping
-      const horizontalOverlap = Math.abs(position.x - sticker.posX) < (cardWidth + margin);
-      const verticalOverlap = Math.abs(position.y - sticker.posY) < (cardHeight + margin);
-      
-      if (horizontalOverlap && verticalOverlap) {
-        isFarEnough = false;
-        break;
-      }
-    }
-    
-    if (isFarEnough) {
-      console.log(`Found empty position at (${position.x}, ${position.y})`);
-      return position;
-    }
-  }
-  
-  // If none of the fixed positions work, try a grid approach for more options
-  const viewport = {
-    width: window.innerWidth - 100,
-    height: window.innerHeight - 100
+// Function to get a position that guarantees no overlap
+function getNewItemPosition() {
+  // Define upper left region boundaries
+  const region = {
+    minX: 20,
+    maxX: 250, // Upper left quadrant
+    minY: 20,
+    maxY: 250  // Upper left quadrant
   };
   
-  const columns = Math.floor(viewport.width / (cardWidth + margin));
-  const rows = Math.floor(viewport.height / (cardHeight + margin));
+  // Generate random position within the upper left region
+  const randomX = Math.floor(Math.random() * (region.maxX - region.minX)) + region.minX;
+  const randomY = Math.floor(Math.random() * (region.maxY - region.minY)) + region.minY;
   
-  // Create a grid of potential positions
-  const grid = [];
-  for (let row = 0; row < rows; row++) {
-    for (let col = 0; col < columns; col++) {
-      grid.push({
-        x: col * (cardWidth + margin) + 50,
-        y: row * (cardHeight + margin) + 50,
-        occupied: false
-      });
-    }
-  }
+  console.log(`Placing new item in upper left region at (${randomX}, ${randomY})`);
   
-  // Mark positions as occupied
-  for (const position of grid) {
-    for (const sticker of existingStickers) {
-      if (sticker.posX === undefined || sticker.posY === undefined) continue;
-      
-      const horizontalOverlap = Math.abs(position.x - sticker.posX) < (cardWidth + margin);
-      const verticalOverlap = Math.abs(position.y - sticker.posY) < (cardHeight + margin);
-      
-      if (horizontalOverlap && verticalOverlap) {
-        position.occupied = true;
-        break;
-      }
-    }
-  }
-  
-  // Filter out occupied positions
-  const emptyPositions = grid.filter(pos => !pos.occupied);
-  
-  // If we have empty positions, pick a random one
-  if (emptyPositions.length > 0) {
-    const randomIndex = Math.floor(Math.random() * emptyPositions.length);
-    console.log(`Found grid position at (${emptyPositions[randomIndex].x}, ${emptyPositions[randomIndex].y})`);
-    return {
-      x: emptyPositions[randomIndex].x,
-      y: emptyPositions[randomIndex].y
-    };
-  }
-  
-  // As a last resort, generate a position that's at least not directly on top of others
-  let attempts = 0;
-  const maxAttempts = 20;
-  
-  while (attempts < maxAttempts) {
-    attempts++;
-    
-    const randomX = Math.random() * (viewport.width - cardWidth) + 50;
-    const randomY = Math.random() * (viewport.height - cardHeight) + 50;
-    
-    let isFarEnough = true;
-    
-    for (const sticker of existingStickers) {
-      if (sticker.posX === undefined || sticker.posY === undefined) continue;
-      
-      const horizontalOverlap = Math.abs(randomX - sticker.posX) < (cardWidth + margin/2);
-      const verticalOverlap = Math.abs(randomY - sticker.posY) < (cardHeight + margin/2);
-      
-      if (horizontalOverlap && verticalOverlap) {
-        isFarEnough = false;
-        break;
-      }
-    }
-    
-    if (isFarEnough) {
-      console.log(`Found random position at (${randomX}, ${randomY}) after ${attempts} attempts`);
-      return { x: randomX, y: randomY };
-    }
-  }
-  
-  // If all else fails, just return a completely random position
-  console.log('Could not find a non-overlapping position, using fallback random position');
   return {
-    x: Math.random() * (viewport.width - cardWidth) + 50,
-    y: Math.random() * (viewport.height - cardHeight) + 50
+    x: randomX,
+    y: randomY
   };
 }
 
@@ -674,15 +617,17 @@ async function addSticky({title, expDate, quantity, color = "#fffef5", category 
     // Load existing stickers
     const stickers = loadStickersFromStorage();
     
-    // Find an empty position for the new sticker if not provided
+    // Use provided position or get a new one
     if (posX === null || posY === null) {
-      const emptyPos = findEmptyPosition(stickers);
-      posX = emptyPos.x;
-      posY = emptyPos.y;
+      const newPosition = getNewItemPosition();
+      posX = newPosition.x;
+      posY = newPosition.y;
+      console.log(`Placing new item at position (${posX}, ${posY})`);
     }
     
     console.log('Adding new sticker to storage:', {title, expDate, quantity, color, category, posX, posY});
-    stickers.push({title, expDate, quantity, color, category, posX, posY});
+    // Add isNew flag for new items
+    stickers.push({title, expDate, quantity, color, category, posX, posY, isNew: true});
     saveStickersToStorage(stickers);
     
     // Refresh the display to show the new item
@@ -724,7 +669,17 @@ uploadSticker
       const lines = response.trim().split("\n");
       const [title, expDate, quantity] = lines.map(x => x.trim());
 
-      addSticky({title, expDate, quantity}, true); // true means save to storage
+      // Get a position for the scanned sticker in the upper left region
+      const position = getNewItemPosition();
+      
+      // Pass the position explicitly to ensure it's placed in the upper left
+      addSticky({
+        title, 
+        expDate, 
+        quantity, 
+        posX: position.x, 
+        posY: position.y
+      }, true);
 
       submitBtn.disabled = false;
       submitBtn.value = "Scan Sticker";
@@ -741,6 +696,21 @@ window.checkStorage = function() {
 
 // Event listener for "Tidy Up" button
 tidyUpBtn.addEventListener('click', () => {
+  // Remove all NEW indicators when tidying up
+  const stickers = loadStickersFromStorage();
+  let hasChanges = false;
+  
+  stickers.forEach((sticker, index) => {
+    if (sticker.isNew) {
+      sticker.isNew = false;
+      hasChanges = true;
+    }
+  });
+  
+  if (hasChanges) {
+    saveStickersToStorage(stickers);
+  }
+  
   // Arrange all stickers in grid layout
   refreshStickerDisplay(true);
 });
