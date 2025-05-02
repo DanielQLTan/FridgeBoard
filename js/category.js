@@ -81,18 +81,8 @@ function displayStickersByCategory() {
     const cardRow = document.createElement('div');
     cardRow.className = 'card-grid';
     
-    // Keep track of global index for delete functionality
-    let globalIndex = 0;
-    
     // Add items to the category
     categories[category].forEach((sticker, categoryIndex) => {
-      // Find the global index of this item in the original stickers array
-      globalIndex = stickers.findIndex(s => 
-        s.title === sticker.title && 
-        s.expDate === sticker.expDate &&
-        s.category === sticker.category
-      );
-      
       const card = document.createElement('div');
       card.className = 'item-card';
       
@@ -107,22 +97,10 @@ function displayStickersByCategory() {
       expireDate.className = 'item-date';
       expireDate.textContent = sticker.expDate;
       
-      // Create delete button
-      const deleteBtn = document.createElement('button');
-      deleteBtn.className = 'card-delete-btn';
-      deleteBtn.innerHTML = '×';
-      deleteBtn.title = 'Delete this item';
-      
-      // Add delete functionality
-      deleteBtn.addEventListener('click', (event) => {
-        event.stopPropagation();
-        // Use the global index for deleting
-        deleteSticker(globalIndex);
-      });
+      // No delete button on category page as requested
       
       cardBody.appendChild(itemName);
       cardBody.appendChild(expireDate);
-      cardBody.appendChild(deleteBtn);
       
       card.appendChild(cardBody);
       cardRow.appendChild(card);
