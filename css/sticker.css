@@ -4,8 +4,11 @@ p {
 
 /* Action buttons container */
 .action-buttons-container {
+  position: relative;
   display: flex;
-  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
   margin-bottom: 1rem;
 }
 
@@ -21,10 +24,12 @@ p {
   cursor: pointer;
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
   border-radius: 4px;
-  margin-bottom: 1rem;
+  margin: 0;
   display: inline-block;
   text-decoration: none;
   transition: background-color 0.2s, transform 0.2s;
+  vertical-align: middle;
+  line-height: 1.25rem;
 }
 
 .action-button:hover {
@@ -40,7 +45,11 @@ p {
 
 /* Tidy button styling */
 .tidy-button {
+  position: fixed;
+  top: 20px;
+  right: 20px;
   background-color: #7ED7F0;
+  z-index: 2000;
 }
 
 .tidy-button:hover {
@@ -116,9 +125,9 @@ p {
 
 /* Larger input boxes inside the modal */
 .modal-content .form-control {
-  height: 80px;      /* increase box height */
-  padding: 0 16px;   /* keep side padding comfortable */
-  font-size: 1rem;   /* inherit existing text size */
+  height: 80px;
+  padding: 0 16px;
+  font-size: 1rem;
 }
 
 .canvas-container {
@@ -151,17 +160,6 @@ canvas {
 
 .add-item-button:hover {
   background-color: #c8f087;
-}
-
-.upload-sticker {
-	margin-bottom: 2rem;
-
-	& form {
-	  display: flex;
-	  justify-content: space-between;
-	  align-items: center;
-	  gap: 1rem;
-	}
 }
 
 /* Legacy sticky styles for backward compatibility */
@@ -254,17 +252,7 @@ canvas {
   .floating-switch:hover{background:#8a8a8a;}
   .floating-switch img{width:40%;pointer-events:none;user-select:none;}
   
-  /* full‑width lime‑green Add‑item button */
-  .add-item-button{
-    display:block;
-    width:100%;
-    margin-top:40px;
-    background:#d6ff9b;
-    border:none;
-    padding:14px 0;
-    font-size:1.25rem;
-    border-radius:12px;
-  }
+
   
   /* faint guide lines across the handwriting canvas */
   #handwriting-canvas{
@@ -281,3 +269,31 @@ canvas {
   }
   #handwriting-canvas::before{top:33.33%;}
   #handwriting-canvas::after {top:66.66%;}
+
+  /* Part 3 */
+
+  /* generic hide helper now that Bootstrap is gone */
+  .d-none { display:none !important; }
+
+  /* button bar inside the camera modal */
+  .modal-actions{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    margin-top:16px;
+  }
+
+  .btn-primary,
+  .btn-secondary,
+  .btn-success{
+    flex:1 1 0;
+  }
+
+/* keep Scan‑Sticker form inline and flush with the Add button */
+.upload-sticker{
+  display:inline-block;
+  margin:0;
+}
+.upload-sticker form{
+  display:inline-block;
+}

@@ -3,14 +3,13 @@
 // Sections:
 //   1. Global DOM Elements
 //   2. Add Item Pop-up page (typing/handwriting panel)
-//   3. Sticker Data Persistence (localStorage) & Category Helpers
-//   4. Sticker Display & Layout
-//   5. Drag & Positioning Utilities
-//   6. Sticker Upload (Image OCR)
+//   3. Section 3: Scan Stickers (camera capture)
+//   4. Sticker Data Persistence (localStorage) & Category Helpers
+//   5. Sticker Display & Layout
+//   6. Drag & Positioning Utilities
 //   7. Tidy Up & Grid Arrangement
 //   8. Initialization
 // =============================================================================
-import { OPENAI_API_KEY } from './config.js';
 
 // ============================================================================
 // Section 1: Global DOM Elements
@@ -152,7 +151,128 @@ closeModalBtn.addEventListener('click', function() {
 
 
 // ============================================================================
-// Section 3: Sticker Data Persistence (localStorage) & Category Helpers
+// Section 3: Scan Stickers (camera capture)
+// ============================================================================
+
+const scanForm  = document.querySelector(".upload-sticker form");
+const scanBtn   = scanForm.querySelector('input[type="submit"]');  // green button
+const scanModal    = document.getElementById('scan-modal');
+const scanCloseBtn = document.getElementById('scan-close-btn');
+
+const videoEl       = document.getElementById('camera-video');
+const capturedImgEl = document.getElementById('captured-img');
+const captureBtn    = document.getElementById('capture-btn');
+const recaptureBtn  = document.getElementById('recapture-btn');
+const confirmBtn    = document.getElementById('confirm-btn');
+
+let videoStream = null;
+let capturedDataUrl = null;
+let videoReady = false;
+captureBtn.disabled = true;
+
+function openScanModal(){
+  scanModal.style.display = 'flex';
+}
+function closeScanModal(){
+  scanModal.style.display = 'none';
+  videoEl.classList.remove('d-none');
+  capturedImgEl.classList.add('d-none');
+  captureBtn.style.display  = '';
+  recaptureBtn.style.display= 'none';
+  confirmBtn.style.display  = 'none';
+  capturedDataUrl = null;
+}
+
+//------------- open the pop-up page ----------------------------
+scanBtn.addEventListener('click', async (e) => {
+  e.preventDefault();
+
+  if (!videoStream){
+    try{
+      videoStream = await navigator.mediaDevices.getUserMedia({video:true});
+      videoEl.srcObject = videoStream;
+      videoReady = false;
+      videoEl.onloadedmetadata = () => {
+        videoReady = true;
+        captureBtn.disabled = false;
+      };
+    }catch(err){
+      alert('Unable to access camera.');
+      return;
+    }
+  }
+  captureBtn.disabled = !videoReady;
+  openScanModal();
+});
+
+//---------------- close the pop-up page ---------------------------
+scanCloseBtn.addEventListener('click', closeScanModal);
+
+//---------------- capture the sticker ----------------------------
+captureBtn.addEventListener('click', () => {
+  if (!videoReady) return;
+
+  const canvas = document.createElement('canvas');
+  canvas.width  = videoEl.videoWidth  || videoEl.clientWidth;
+  canvas.height = videoEl.videoHeight || videoEl.clientHeight;
+
+  canvas.getContext('2d').drawImage(videoEl, 0, 0, canvas.width, canvas.height);
+
+  capturedDataUrl = canvas.toDataURL('image/jpeg');
+  capturedImgEl.src = capturedDataUrl;
+  capturedImgEl.style.display = '';
+  capturedImgEl.classList.remove('d-none');
+  videoEl.classList.add('d-none');
+
+  captureBtn.style.display  = 'none';
+  recaptureBtn.style.display= '';
+  recaptureBtn.classList.remove('d-none');
+  confirmBtn.style.display  = '';
+  confirmBtn.classList.remove('d-none');
+});
+
+//------------ re‑capture the sticker if user wants to ----------
+recaptureBtn.addEventListener('click', () => {
+  videoEl.classList.remove('d-none');
+  capturedImgEl.style.display='none';
+  captureBtn.style.display  = '';
+  recaptureBtn.style.display= 'none';
+  confirmBtn.style.display  = 'none';
+  capturedDataUrl = null;
+});
+
+//----------- confirm submission of the sticker -----------------
+confirmBtn.addEventListener('click', async ()=>{
+  if(!capturedDataUrl) return;
+
+  confirmBtn.disabled=true;
+  confirmBtn.textContent='Processing…';
+
+  const resp = await fetch(
+    'https://noggin.rea.gent/wily-starfish-4015',
+    {
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        Authorization:'Bearer rg_v1_f19t3fxicscspdee1x5rk3i9frr873wzsb9j_ngk'
+      },
+      body:JSON.stringify({sticker:capturedDataUrl})
+    }
+  ).then(r=>r.text());
+
+  const [title,expDate,quantity] = resp.trim().split('\n').map(s=>s.trim());
+  const {x:posX,y:posY} = getNewItemPosition();
+  await addSticky({title,expDate,quantity,posX,posY},true);
+
+  confirmBtn.disabled=false;
+  confirmBtn.textContent='Confirm';
+  captureBtn.disabled = true;
+  closeScanModal();
+});
+
+
+// ============================================================================
+// Section 4: Sticker Data Persistence (localStorage) & Category Helpers
 // ============================================================================
 // Function to save stickers to localStorage
 function saveStickersToStorage(stickers) {
@@ -167,54 +287,12 @@ function loadStickersFromStorage() {
 }
 
 // ============================================================================
-// Section 4: Sticker Display & Layout
+// Section 5: Sticker Display & Layout
 // ============================================================================
 // Load existing stickers on page load
 window.addEventListener('load', () => {
   refreshStickerDisplay();
 });
-
-async function categorizeSticker(title) {
-  try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${OPENAI_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: "gpt-4o",
-        messages: [
-          {
-            role: "system",
-            content: "You are a helpful assistant that categorizes food items. Only respond with one of these categories without explanation: Dairy, Eggs, Vegetables, Fruits, Meats, Seafood, Drinks, Sauces, Other."
-          },
-          {
-            role: "user",
-            content: `Categorize this food item: ${title}`
-          }
-        ],
-        max_tokens: 10,
-        temperature: 0.2
-      })
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Error getting category from API:', errorText);
-      console.error('Response status:', response.status);
-      return 'Other'; // Fallback category
-    }
-
-    const data = await response.json();
-    const category = data.choices[0].message.content.trim();
-    return category;
-  } catch (error) {
-    console.error('Error in categorization:', error);
-    console.error('Error details:', error.message);
-    return 'Other'; // Return Other if API fails
-  }
-}
 
 // Function to delete a sticker by its index
 function deleteSticker(index) {
@@ -383,7 +461,7 @@ function removeNewIndicator(index) {
 }
 
 // ============================================================================
-// Section 5: Drag & Positioning Utilities
+// Section 6: Drag & Positioning Utilities
 // ============================================================================
 // Function to make an element draggable
 function makeDraggable(element, stickerIndex) {
@@ -553,9 +631,9 @@ async function addSticky({title, expDate, quantity, color = "#fffef5", category 
     expDate = response.trim() + " (Suggested)";
   }
   
-  // If category not provided, use OpenAI to categorize
-  if (!category && shouldSave) {
-    category = await categorizeSticker(title);
+  // If category not provided, give a simple default
+  if (!category) {
+    category = 'Other';
   }
 
   // Only save to localStorage if shouldSave is true
@@ -576,68 +654,6 @@ async function addSticky({title, expDate, quantity, color = "#fffef5", category 
     // Refresh the display to show the new item
     refreshStickerDisplay();
   }
-}
-
-// ============================================================================
-// Section 6: Sticker Upload (Image OCR)
-// ============================================================================
-const uploadSticker = document.querySelector(".upload-sticker");
-const fileInput = uploadSticker.querySelector('input[type="file"]');
-const submitBtn = uploadSticker.querySelector('input[type="submit"]');
-
-uploadSticker
-  .querySelector("form")
-  .addEventListener("submit", async (event) => {
-    event.preventDefault();
-
-    submitBtn.disabled = true;
-    submitBtn.value = "Processing...";
-
-    const file = fileInput.files[0];
-    const fileReader = new FileReader();
-    fileReader.onload = async (readEvent) => {
-      const dataUrl = readEvent.target.result;
-
-      const response = await fetch(
-          'https://noggin.rea.gent/wily-starfish-4015',
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: 'Bearer rg_v1_f19t3fxicscspdee1x5rk3i9frr873wzsb9j_ngk',
-            },
-            body: JSON.stringify({
-              "sticker": dataUrl,
-            }),
-          }
-        ).then(response => response.text());
-
-      const lines = response.trim().split("\n");
-      const [title, expDate, quantity] = lines.map(x => x.trim());
-
-      // Get a position for the scanned sticker in the upper left region
-      const position = getNewItemPosition();
-      
-      // Pass the position explicitly to ensure it's placed in the upper left
-      addSticky({
-        title, 
-        expDate, 
-        quantity, 
-        posX: position.x, 
-        posY: position.y
-      }, true);
-
-      submitBtn.disabled = false;
-      submitBtn.value = "Scan Sticker";
-      fileInput.value = "";
-    };
-
-    fileReader.readAsDataURL(file);
-  });
-
-// Add a test function to check localStorage
-window.checkStorage = function() {
-  // No-op for production
 }
 
 // ============================================================================
