@@ -1,0 +1,60 @@
+/* Navigation Bar Styles */
+:root {
+  --heading-font-family: "Bahnschrift", Helvetica;
+  --heading-font-weight: 400;
+  --heading-font-size: 24px;
+  --heading-line-height: 24px;
+  --tag-font-family: "Lato", Helvetica;
+  --tag-font-weight: 400;
+  --tag-font-size: 10px;
+  --tag-line-height: normal;
+  --variable-collection-dark-gray: rgba(35, 35, 35, 1);
+  --nav: 0px -2px 8px 0px rgba(0, 0, 0, 0.08);
+}
+
+.navi-bar {
+  position: fixed;
+  width: 100%;
+  height: 80px;
+  bottom: 0;
+  left: 0;
+  background-color: #ffffff;
+  box-shadow: var(--nav);
+  display: flex;
+  justify-content: center;
+  z-index: 100;
+}
+
+.navi-bar .nav-item {
+  display: flex;
+  flex-direction: column;
+  width: 80px;
+  gap: 4px;
+  align-items: center;
+  position: relative;
+  margin: 8px 32px;
+}
+
+.navi-bar .nav-icon {
+  width: 32px;
+  height: 32px;
+}
+
+.navi-bar .nav-text {
+  color: var(--variable-collection-dark-gray);
+  text-align: center;
+  font-family: var(--tag-font-family);
+  font-weight: var(--tag-font-weight);
+  font-size: var(--tag-font-size);
+  line-height: var(--tag-line-height);
+}
+
+/* Active state for category page */
+.navi-bar .nav-item.active .nav-text {
+  font-weight: 600;
+}
+
+/* Provide spacing for content above the fixed navbar */
+body {
+  padding-bottom: 80px;
+} 

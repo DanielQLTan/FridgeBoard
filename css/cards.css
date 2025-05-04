@@ -1,0 +1,103 @@
+/* Shared card layout for sticker and category pages */
+
+/* Card grid layout */
+.card-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 1rem;
+}
+
+/* Item card styling */
+.item-card {
+  width: 150px;
+  margin: 0.5rem;
+  background-color: white;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  border-radius: 0.25rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
+}
+
+.item-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.item-card-body {
+  padding: 1rem;
+  position: relative;
+}
+
+.item-name {
+  font-size: 0.9rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.item-date {
+  font-size: 0.8rem;
+  color: #6c757d;
+  margin: 0;
+}
+
+.item-quantity {
+  font-size: 0.8rem;
+  color: #6c757d;
+  margin: 0;
+}
+
+.card-delete-btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.card-delete-btn:hover {
+  opacity: 1;
+}
+
+/* Category section styling (used only in category page) */
+.category-section {
+  margin-bottom: 3rem;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+}
+
+/* Category header */
+.category-header {
+  margin-bottom: 1rem;
+  font-size: 1.75rem;
+}
+
+/* Category-specific background colors */
+.category-vegetables { background-color: #e8f5e9; }
+.category-fruits { background-color: #fff8e1; }
+.category-meats { background-color: #ffebee; }
+.category-dairy { background-color: #e3f2fd; }
+.category-eggs { background-color: #fff3e0; }
+.category-seafood { background-color: #e0f7fa; }
+.category-drinks { background-color: #e8eaf6; }
+.category-sauces { background-color: #fce4ec; }
+.category-other { background-color: #f5f5f5; } 
