@@ -11,7 +11,7 @@
 // =============================================================================
 
 // ============================================================================
-// Section 1: Global DOM Elements
+// Section 1: Global DOM Elements & Helper function
 // ============================================================================
 
 const stickyBoard = document.getElementById("sticky-board");
@@ -23,6 +23,7 @@ const tidyUpBtn = document.getElementById('tidy-up-btn');
 
 let gridActive = false;   // true when board is in grid layout
 
+// Tidy up by grid
 function setGridMode(on){
   gridActive = on;
   localStorage.setItem('gridMode', on ? '1' : '0');
@@ -302,17 +303,31 @@ window.addEventListener('load', () => {
 });
 
 // Function to delete a sticker by its index
-function deleteSticker(index) {
-  // Get current stickers from localStorage
+function deleteSticker(indexToRemove) {
   const stickers = loadStickersFromStorage();
-  
-  // Remove the sticker at the specified index
-  stickers.splice(index, 1);
-  
-  // Save the updated stickers array back to localStorage
+
+  // 1. Grab the current DOM cards and their true pixel positions
+  const container = document.querySelector('.card-container');
+  if (container) {
+    const boardRect = container.getBoundingClientRect();
+    const cardNodes = container.querySelectorAll('.item-card');
+
+    cardNodes.forEach((card, domIdx) => {
+      if (domIdx === indexToRemove) return;     // skip the one we’ll delete
+      if (!stickers[domIdx]) return;            // safety
+
+      const rect = card.getBoundingClientRect();
+      stickers[domIdx].posX = rect.left - boardRect.left;
+      stickers[domIdx].posY = rect.top  - boardRect.top;
+    });
+  }
+
+  // 2. Remove the chosen sticker from the data array
+  stickers.splice(indexToRemove, 1);
+
+  // 3. Persist and redraw in the current layout mode
   saveStickersToStorage(stickers);
-  
-  refreshStickerDisplay(gridActive);
+  refreshStickerDisplay(gridActive);   // gridActive is true if you were tidied
 }
 
 // Function to refresh the sticker display
@@ -604,7 +619,7 @@ function getNewItemPosition() {
   };
 }
 
-// Updated function to add a sticky note with position data
+// Key function: add a sticky note
 async function addSticky({title, expDate, quantity, color = "#fffef5", category = null, posX = null, posY = null}, shouldSave = true, index = null) {
   if (!quantity) {
     quantity = "1";
@@ -630,9 +645,26 @@ async function addSticky({title, expDate, quantity, color = "#fffef5", category 
     expDate = response.trim() + " (Suggested)";
   }
   
-  // If category not provided, give a simple default
+  // Get Category by name
   if (!category) {
-    category = 'Other';
+    try {
+      const catResp = await fetch(
+        'https://noggin.rea.gent/better-termite-1234',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer rg_v1_mi5yaxvwg3hy61pnupbog4s47to2qr6gru3r_ngk'
+          },
+          body: JSON.stringify({ name: title })
+        }
+      ).then(r => r.text());
+
+      category = catResp.trim() || 'Other';
+    } catch (err) {
+      console.error('Category API error:', err);
+      category = 'Other';
+    }
   }
 
   // Only save to localStorage if shouldSave is true
