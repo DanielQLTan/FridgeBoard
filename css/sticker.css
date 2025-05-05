@@ -59,7 +59,7 @@ p {
 /* Card container for draggable cards */
 .card-container {
   position: relative;
-  min-height: 600px;
+  min-height: 0px;
   width: 100%;
 }
 
@@ -296,4 +296,12 @@ canvas {
 }
 .upload-sticker form{
   display:inline-block;
+}
+
+/* part 5 */
+
+/* sticker card size */
+.item-card{
+  width: 220px;
+  height: 100px;
 }

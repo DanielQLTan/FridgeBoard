@@ -14,7 +14,7 @@
 	<div class="container mt-4">
 		<h1>Stickers</h1>
 
-		<!-- Action Buttons -->
+		<!-- 3 Main Buttons -->
 		<div class="action-buttons-container">
 			<button class="action-button" id="add-item-btn">Add New Item</button>
 			<button class="action-button tidy-button" id="tidy-up-btn">Tidy Up</button>
@@ -25,16 +25,14 @@
 			</div>
 		</div>
 
-		<!-- ===== Camera capture modal for scanning stickers ===== -->
+		<!-- Camera capture modal for scanning stickers -->
 		<div id="scan-modal" class="modal-overlay" style="display:none;">
 			<div class="modal-content" style="max-width:560px;">
 			<button id="scan-close-btn" class="close-btn">&times;</button>
-		
-			<!-- live camera -->
+
 			<video id="camera-video" autoplay playsinline
 					style="background:black; width:100%; aspect-ratio:4/3;"></video>
 		
-			<!-- captured preview -->
 			<img id="captured-img" class="d-none" style="width:100%;" />
 		
 			<p class="text-muted mt-2 mb-3" id="capture-hint">
@@ -80,7 +78,6 @@
 					width="500" height="300"
 					style="border:1px solid #ccc;"></canvas>
 	
-			<!-- overlay prompts -->
 			<div class="position-absolute top-0 start-0 w-100 h-100
 						text-muted"
 				style="pointer-events:none; font-size:18px; padding:10px;
@@ -95,10 +92,10 @@
 	
         <!-- -------------  ACTIONS ------------- -->
         <div class="input-wrapper position-relative">
-          <!-- big green Add‑item button -->
+          <!-- Add‑item button -->
           <button id="add-item-submit" class="add-item-button">Add item</button>
 
-          <!-- floating round switch button -->
+          <!-- Switch button -->
           <button id="toggle-handwriting-btn"
                   class="floating-switch"
                   title="Switch input mode">

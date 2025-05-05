@@ -4,11 +4,10 @@
 //   1. Global DOM Elements
 //   2. Add Item Pop-up page (typing/handwriting panel)
 //   3. Section 3: Scan Stickers (camera capture)
-//   4. Sticker Data Persistence (localStorage) & Category Helpers
+//   4. LocalStorage for sticker objects
 //   5. Sticker Display & Layout
 //   6. Drag & Positioning Utilities
 //   7. Tidy Up & Grid Arrangement
-//   8. Initialization
 // =============================================================================
 
 // ============================================================================
@@ -22,6 +21,12 @@ const addItemBtn = document.getElementById('add-item-btn');
 const addItemSubmit = document.getElementById('add-item-submit');
 const tidyUpBtn = document.getElementById('tidy-up-btn');
 
+let gridActive = false;   // true when board is in grid layout
+
+function setGridMode(on){
+  gridActive = on;
+  localStorage.setItem('gridMode', on ? '1' : '0');
+}
 
 // ============================================================================
 // Section 2: Add Item Pop-up page (typing/handwriting panel)
@@ -272,7 +277,7 @@ confirmBtn.addEventListener('click', async ()=>{
 
 
 // ============================================================================
-// Section 4: Sticker Data Persistence (localStorage) & Category Helpers
+// Section 4: LocalStorage for sticker objects
 // ============================================================================
 // Function to save stickers to localStorage
 function saveStickersToStorage(stickers) {
@@ -291,7 +296,9 @@ function loadStickersFromStorage() {
 // ============================================================================
 // Load existing stickers on page load
 window.addEventListener('load', () => {
-  refreshStickerDisplay();
+  gridActive = localStorage.getItem('gridMode') === '1';
+  refreshStickerDisplay(gridActive);
+  return;
 });
 
 // Function to delete a sticker by its index
@@ -305,8 +312,7 @@ function deleteSticker(index) {
   // Save the updated stickers array back to localStorage
   saveStickersToStorage(stickers);
   
-  // Refresh the display
-  refreshStickerDisplay();
+  refreshStickerDisplay(gridActive);
 }
 
 // Function to refresh the sticker display
@@ -333,12 +339,10 @@ function refreshStickerDisplay(useGridLayout = false) {
   
   // Create cards in grid or free positions
   if (useGridLayout) {
-    // Create in grid layout - reset all positions
     arrangeCardsInGrid(savedStickers, cardContainer);
   } else {
-    // Create with saved positions
-  savedStickers.forEach((sticker, index) => {
-      createDraggableCard(sticker, index, cardContainer);
+    savedStickers.forEach((sticker, index) => {
+      createDraggableCard(sticker, index, cardContainer, false);
     });
   }
   
@@ -346,51 +350,29 @@ function refreshStickerDisplay(useGridLayout = false) {
 }
 
 // Function to arrange cards in a grid layout
-function arrangeCardsInGrid(stickers, container) {
-  const cardWidth = 200;
-  const cardHeight = 240;
-  const gapX = 20;
-  const gapY = 20;
-  const rightMargin = 30; // Additional margin to ensure cards stay within view
-  
-  // Calculate available width, accounting for a safe margin on right side
-  const availableWidth = window.innerWidth - rightMargin;
-  
-  // Ensure we leave enough space for at least 1 card plus margins
-  const safeWidth = Math.max(availableWidth - (cardWidth + gapX*2), cardWidth + gapX*2);
-  
-  // Calculate number of cards per row based on available width
-  const cardsPerRow = Math.floor(safeWidth / (cardWidth + gapX));
-  
-  stickers.forEach((sticker, index) => {
-    const row = Math.floor(index / cardsPerRow);
-    const col = index % cardsPerRow;
-    
-    const left = col * (cardWidth + gapX) + 10;
-    const top = row * (cardHeight + gapY) + 10;
-    
-    // Update sticker with new position
-    sticker.posX = left;
-    sticker.posY = top;
-    
-    // Create the card with updated position
-    createDraggableCard(sticker, index, container);
-  });
-  
-  // Save the updated positions to localStorage
-  saveStickersToStorage(stickers);
+function arrangeCardsInGrid(stickers, container){
+  container.style.display = 'grid';
+  container.style.gridTemplateColumns = 'repeat(auto-fill, 220px)';
+  container.style.gap = '15px';
+  container.style.gridAutoRows = '100px';  
+
+  stickers.forEach((s, idx) =>
+    createDraggableCard(s, idx, container, /*grid=*/true)
+  );
+
+  gridActive = true;
 }
 
 // Updated function to create a draggable card with NEW indicator
-function createDraggableCard(sticker, index, container) {
+function createDraggableCard(sticker, index, container, grid = false) {
   // Create card for each item
   const card = document.createElement('div');
   card.className = 'item-card draggable';
-  card.style.position = 'absolute';
-  
-  // Set position from saved data or default
-  card.style.left = (sticker.posX !== undefined) ? `${sticker.posX}px` : '10px';
-  card.style.top = (sticker.posY !== undefined) ? `${sticker.posY}px` : '10px';
+  card.style.position = grid ? 'relative' : 'absolute';
+  if (!grid) {
+    card.style.left = (sticker.posX ?? 10) + 'px';
+    card.style.top  = (sticker.posY ?? 10) + 'px';
+  }
   card.style.zIndex = 1;
   
   const cardBody = document.createElement('div');
@@ -474,7 +456,15 @@ function makeDraggable(element, stickerIndex) {
   
   function dragMouseDown(e) {
     e.preventDefault();
-    
+    setGridMode(false);
+
+    if (getComputedStyle(element).position !== 'absolute') {
+      const boardRect = stickyBoard.getBoundingClientRect();
+      const cardRect  = element.getBoundingClientRect();
+      element.style.position = 'absolute';
+      element.style.left = (cardRect.left - boardRect.left) + 'px';
+      element.style.top  = (cardRect.top  - boardRect.top)  + 'px';
+    }
     // Get initial positions
     initialX = element.offsetLeft;
     initialY = element.offsetTop;
@@ -492,8 +482,17 @@ function makeDraggable(element, stickerIndex) {
   
   function dragTouchStart(e) {
     e.preventDefault();
+    setGridMode(false);
+
+    if (getComputedStyle(element).position !== 'absolute') {
+      const boardRect = stickyBoard.getBoundingClientRect();
+      const cardRect  = element.getBoundingClientRect();
+      element.style.position = 'absolute';
+      element.style.left = (cardRect.left - boardRect.left) + 'px';
+      element.style.top  = (cardRect.top  - boardRect.top)  + 'px';
+    }
+
     const touch = e.touches[0];
-    
     // Get initial positions
     initialX = element.offsetLeft;
     initialY = element.offsetTop;
@@ -651,8 +650,7 @@ async function addSticky({title, expDate, quantity, color = "#fffef5", category 
     stickers.push({title, expDate, quantity, color, category, posX, posY, isNew: true});
     saveStickersToStorage(stickers);
     
-    // Refresh the display to show the new item
-    refreshStickerDisplay();
+    refreshStickerDisplay(gridActive);
   }
 }
 
@@ -676,12 +674,8 @@ tidyUpBtn.addEventListener('click', () => {
     saveStickersToStorage(stickers);
   }
   
+  setGridMode(true);
+
   // Arrange all stickers in grid layout
   refreshStickerDisplay(true);
 });
-
-// ============================================================================
-// Section 8: Initialization
-// ============================================================================
-
-console.log("============= STICKER JS LOADED =============");
