@@ -1,67 +1,53 @@
-/* Navigation Bar Styles */
-:root {
-  --heading-font-family: "Bahnschrift", Helvetica;
-  --heading-font-weight: 400;
-  --heading-font-size: 24px;
-  --heading-line-height: 24px;
-  --tag-font-family: "Lato", Helvetica;
-  --tag-font-weight: 400;
-  --tag-font-size: 10px;
-  --tag-line-height: normal;
-  --variable-collection-dark-gray: rgba(35, 35, 35, 1);
-  --nav: 0px -2px 8px 0px rgba(0, 0, 0, 0.08);
-}
-
-.nav-bar {
-  position: fixed;
-  width: 100%;
-  height: 80px;
-  bottom: 0;
-  left: 0;
-  background-color: #ffffff;
-  box-shadow: var(--nav);
-  display: flex;
-  justify-content: center;
-  z-index: 100;
-}
-
-.nav-bar .nav-item {
-  display: flex;
-  flex-direction: column;
-  width: 80px;
-  gap: 4px;
-  align-items: center;
-  position: relative;
-  margin: 8px 32px;
-}
-
-.nav-bar .nav-icon {
-  width: 32px;
-  height: 32px;
-}
-
-.nav-bar .nav-text {
-  color: var(--variable-collection-dark-gray);
-  text-align: center;
-  font-family: var(--tag-font-family);
-  font-weight: var(--tag-font-weight);
-  font-size: var(--tag-font-size);
-  line-height: var(--tag-line-height);
-}
-
-/* Active state for category page */
-.nav-bar .nav-item.active .nav-text {
-  font-weight: 600;
-}
-
-/* Provide spacing for content above the fixed navbar */
+/* Global */
 body {
   padding-bottom: 80px;
 }
 
-/* Shared card layout for sticker and category pages */
+a {
+  text-decoration: none;
+}
 
-/* Card grid layout */
+
+
+/* Navbar */
+.nav-bar {
+  position: fixed;
+  width: 100%;
+  height: 7.5%;
+  bottom: 0;
+  background-color: white;
+  box-shadow: 0px -2.5px 10px 0px gray;
+  display: flex;
+  justify-content: center;
+}
+
+.nav-item {
+  display: flex;
+  width: 10%;
+  gap: 5%;
+  align-items: center;
+  margin: 5% 5%;
+}
+
+.nav-icon {
+  width: 750%;
+  height: 750%;
+}
+
+.nav-text {
+  font-size: 18px;
+  color: black;
+}
+
+.active .nav-text {
+  font-weight: bold;
+}
+
+
+
+
+/* Sticker Card */
+
 .card-grid {
   display: flex;
   flex-wrap: wrap;
@@ -154,38 +140,31 @@ body {
 
 
 
-/* Page title layout */
-.page > h1{
-  margin-left: 50px;
-  margin-top: 30px;
-  margin-bottom: 20px;
+/* Category / Expiration */
+h1 {
+  margin-left: 5%;
+  margin-top: 5%;
+  margin-bottom: 2.5%;
 }
 
-/* Group wrapper container layout*/
-.group{
-  border-radius: 8px;
-  padding: 18px 22px 26px;
-  margin: 0 auto 32px;
-  max-width: 700px;
+.group {
+  border-radius: 10px;
+  padding: 2.5%;
+  margin: 0 auto 2.5% auto;
+  max-width: 90%;
 }
 
-/* Group Wrapper's header layout */
-.group h2{
-  margin-top:0;
-  margin-bottom:14px;
-  font-size:1.35rem;
+.group h2 {
+  font-size: 24px;
 }
 
-/* Sticker container layout */
-.grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
-  gap:15px;
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px,1fr));
+  gap: 2.5%;
 }
 
-/* Sticker layout */
-.grid .item-card{
-  width:150px;
-  height:120px;
-  position:relative;
+.item-card {
+  width: 150px;
+  height: 150px;
 }

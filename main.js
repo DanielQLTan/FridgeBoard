@@ -7,19 +7,19 @@ function nav() {
 			</a>
 			<a href="/html/category.html" class="nav-item">
 				<img class="nav-icon" src="../img/grid.svg" alt="Category">
-				<div class="nav-text">Category</div>
+				<div class="nav-text">Sort</div>
 			</a>
 			<a href="/html/expiration.html" class="nav-item">
 				<img class="nav-icon" src="../img/calendar.svg" alt="Expiration">
-				<div class="nav-text">Expiration</div>
+				<div class="nav-text">Track</div>
 			</a>
 			<a href="#" class="nav-item">
 				<img class="nav-icon" src="../img/cart.svg" alt="Shopping">
-				<div class="nav-text">Shopping</div>
+				<div class="nav-text">Shop</div>
 			</a>
 			<a href="#" class="nav-item">
 				<img class="nav-icon" src="../img/user.svg" alt="Profile">
-				<div class="nav-text">Profile</div>
+				<div class="nav-text">Me</div>
 			</a>
 		</div>`;
 	document.body.innerHTML += html;
