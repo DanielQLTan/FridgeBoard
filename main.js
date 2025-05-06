@@ -1,15 +1,15 @@
 function nav() {
 	const html = `
         <div class="nav-bar">
-			<a href="/html/sticker.html" class="nav-item">
+			<a href="../html/sticker.html" class="nav-item">
 				<img class="nav-icon" src="../img/home.svg" alt="Home">
 				<div class="nav-text">Home</div>
 			</a>
-			<a href="/html/category.html" class="nav-item">
+			<a href="../html/category.html" class="nav-item">
 				<img class="nav-icon" src="../img/grid.svg" alt="Category">
 				<div class="nav-text">Sort</div>
 			</a>
-			<a href="/html/expiration.html" class="nav-item">
+			<a href="../html/expiration.html" class="nav-item">
 				<img class="nav-icon" src="../img/calendar.svg" alt="Expiration">
 				<div class="nav-text">Track</div>
 			</a>
@@ -28,7 +28,7 @@ function nav() {
 function bar() {
 	const items = document.querySelectorAll('.nav-item');
 	for (item of items) {
-		if (item.getAttribute('href') == window.location.pathname) {
+		if (item.getAttribute('href').slice(2) == window.location.pathname) {
 			item.classList.add('active');
 			const icon = item.querySelector('.nav-icon');
 			const src = icon.getAttribute('src').replace('.svg', '-active.svg');
