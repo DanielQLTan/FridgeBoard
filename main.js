@@ -1,7 +1,31 @@
-const btn = document.querySelector("button");
-console.log("loaded well");
-
 function nav() {
+	const html = `
+        <div class="nav-bar">
+			<a href="/html/sticker.html" class="nav-item">
+				<img class="nav-icon" src="../img/home.svg" alt="Home">
+				<div class="nav-text">Home</div>
+			</a>
+			<a href="/html/category.html" class="nav-item">
+				<img class="nav-icon" src="../img/grid.svg" alt="Category">
+				<div class="nav-text">Category</div>
+			</a>
+			<a href="/html/expiration.html" class="nav-item">
+				<img class="nav-icon" src="../img/calendar.svg" alt="Expiration">
+				<div class="nav-text">Expiration</div>
+			</a>
+			<a href="#" class="nav-item">
+				<img class="nav-icon" src="../img/cart.svg" alt="Shopping">
+				<div class="nav-text">Shopping</div>
+			</a>
+			<a href="#" class="nav-item">
+				<img class="nav-icon" src="../img/user.svg" alt="Profile">
+				<div class="nav-text">Profile</div>
+			</a>
+		</div>`;
+	document.body.innerHTML += html;
+}
+
+function bar() {
 	const items = document.querySelectorAll('.nav-item');
 	for (item of items) {
 		if (item.getAttribute('href') == window.location.pathname) {
@@ -12,4 +36,6 @@ function nav() {
 		}
 	}
 }
-document.addEventListener('DOMContentLoaded', nav);
+
+nav();
+bar();

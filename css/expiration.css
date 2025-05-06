@@ -1,40 +1,4 @@
-/* Page title layout */
-.exp-page > h1{
-	margin-left: 50px;
-	margin-top: 30px;
-	margin-bottom: 20px;
-}
-
-/* Group wrapper container layout*/
-.exp-group{
-	border-radius: 8px;
-	padding: 18px 22px 26px;
-	margin: 0 auto 32px;
-	max-width: 700px;
-}
-
-/* Group Wrapper's header layout */
-.exp-group h2{
-	margin-top:0;
-	margin-bottom:14px;
-	font-size:1.35rem;
-}
-
-/* Group wrapper layout */
-.exp-past  { background:#f8dede; }
-.exp-week  { background:#fef8c9; }
-.exp-month { background:#dfeafa; }
-
-/* Sticker container layout */
-.exp-grid{
-	display:grid;
-	grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
-	gap:15px;
-}
-
-/* Sticker layout */
-.exp-grid .item-card{
-	width:150px;
-	height:120px;
-	position:relative;
-}
+.week{background:#fef8c9;}
+.month{background:#dfeafa;}
+.past{background:#f8dede;}
+.far{background:#e3f6df;}

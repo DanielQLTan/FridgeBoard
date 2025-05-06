@@ -1,10 +1,191 @@
-p {
-	color: black;
+/* Navigation Bar Styles */
+:root {
+  --heading-font-family: "Bahnschrift", Helvetica;
+  --heading-font-weight: 400;
+  --heading-font-size: 24px;
+  --heading-line-height: 24px;
+  --tag-font-family: "Lato", Helvetica;
+  --tag-font-weight: 400;
+  --tag-font-size: 10px;
+  --tag-line-height: normal;
+  --variable-collection-dark-gray: rgba(35, 35, 35, 1);
+  --nav: 0px -2px 8px 0px rgba(0, 0, 0, 0.08);
 }
 
-a {
-  text-decoration: none;
-  outline: none;
-  display: inline-block;
-  margin: 0 5px;
+.nav-bar {
+  position: fixed;
+  width: 100%;
+  height: 80px;
+  bottom: 0;
+  left: 0;
+  background-color: #ffffff;
+  box-shadow: var(--nav);
+  display: flex;
+  justify-content: center;
+  z-index: 100;
+}
+
+.nav-bar .nav-item {
+  display: flex;
+  flex-direction: column;
+  width: 80px;
+  gap: 4px;
+  align-items: center;
+  position: relative;
+  margin: 8px 32px;
+}
+
+.nav-bar .nav-icon {
+  width: 32px;
+  height: 32px;
+}
+
+.nav-bar .nav-text {
+  color: var(--variable-collection-dark-gray);
+  text-align: center;
+  font-family: var(--tag-font-family);
+  font-weight: var(--tag-font-weight);
+  font-size: var(--tag-font-size);
+  line-height: var(--tag-line-height);
+}
+
+/* Active state for category page */
+.nav-bar .nav-item.active .nav-text {
+  font-weight: 600;
+}
+
+/* Provide spacing for content above the fixed navbar */
+body {
+  padding-bottom: 80px;
+}
+
+/* Shared card layout for sticker and category pages */
+
+/* Card grid layout */
+.card-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 1rem;
+}
+
+/* Item card styling */
+.item-card {
+  width: 150px;
+  margin: 0.5rem;
+  background-color: white;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  border-radius: 0.25rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
+}
+
+.item-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.item-card-body {
+  padding: 1rem;
+  position: relative;
+}
+
+.item-name {
+  font-size: 0.9rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.item-date {
+  font-size: 0.8rem;
+  color: #6c757d;
+  margin: 0;
+}
+
+.item-quantity {
+  font-size: 0.8rem;
+  color: #6c757d;
+  margin: 0;
+}
+
+.card-delete-btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.card-delete-btn:hover {
+  opacity: 1;
+}
+
+/* Category section styling (used only in category page) */
+.category-section {
+  margin-bottom: 3rem;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+}
+
+/* Category header */
+.category-header {
+  margin-bottom: 1rem;
+  font-size: 1.75rem;
+}
+
+
+
+/* Page title layout */
+.page > h1{
+  margin-left: 50px;
+  margin-top: 30px;
+  margin-bottom: 20px;
+}
+
+/* Group wrapper container layout*/
+.group{
+  border-radius: 8px;
+  padding: 18px 22px 26px;
+  margin: 0 auto 32px;
+  max-width: 700px;
+}
+
+/* Group Wrapper's header layout */
+.group h2{
+  margin-top:0;
+  margin-bottom:14px;
+  font-size:1.35rem;
+}
+
+/* Sticker container layout */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+  gap:15px;
+}
+
+/* Sticker layout */
+.grid .item-card{
+  width:150px;
+  height:120px;
+  position:relative;
 }

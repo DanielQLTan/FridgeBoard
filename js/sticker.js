@@ -684,7 +684,6 @@ async function addSticky({title, expDate, quantity, color = "#fffef5", category 
     
     refreshStickerDisplay(gridActive);
   }
-  console.log(category)
 }
 
 // ============================================================================

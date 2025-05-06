@@ -1,12 +1,13 @@
 // Create Group Wrappers
 const groups = [
-  { key:'week', title:'Expiring This Week', css:'exp-week'},
-  { key:'month', title:'Expiring This Month', css:'exp-month'},
-  { key:'past', title:'Past Expiry', css:'exp-past'}
+  { key:'week', title:'Expiring within a Week', css:'week'},
+  { key:'month', title:'Expiring within a Month', css:'month'},
+  { key:'past', title:'Already Expired!', css:'past'},
+  { key:'far', title:'In Good Condition', css:'far'}
 ];
 
 const groupMap = {};
-const groupsParent = document.getElementById('exp-groups');
+const groupsParent = document.getElementById('groups');
 groups.forEach(def=>{
   const g = makeGroup(def.title, def.css);
   groupMap[def.key] = g;
@@ -29,7 +30,7 @@ stickers.forEach(sticker => {
   } else if (diff < 30) {
     bucketKey = 'month';
   } else {
-    return;
+    bucketKey = 'far';
   }
 
   const bucket = groupMap[bucketKey];
@@ -49,14 +50,14 @@ function daysBetween(dateStr){
   // make a group wrapper
   function makeGroup(title, className){
     const wrapper = document.createElement('section');
-    wrapper.className = `exp-group ${className}`;
+    wrapper.className = `group ${className}`;
   
     const h2 = document.createElement('h2');
     h2.textContent = title;
     wrapper.appendChild(h2);
   
     const grid = document.createElement('div');
-    grid.className = 'exp-grid';
+    grid.className = 'grid';
     wrapper.appendChild(grid);
   
     return { wrapper, grid };
