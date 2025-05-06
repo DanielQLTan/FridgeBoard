@@ -46,13 +46,6 @@ a {
 
 
 /* Sticker */
-.card-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 1rem;
-}
-
 .item-card {
   width: 150px;
   height: 150px;
@@ -67,6 +60,16 @@ a {
 .item-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+
+
+/* Home Page */
+.card-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 1rem;
 }
 
 .item-card-body {
