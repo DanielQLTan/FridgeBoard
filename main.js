@@ -28,7 +28,7 @@ function nav() {
 function bar() {
 	const items = document.querySelectorAll('.nav-item');
 	for (item of items) {
-		if (item.getAttribute('href').slice(2) == window.location.pathname) {
+		if (item.getAttribute('href').includes(window.location.pathname)) {
 			item.classList.add('active');
 			const icon = item.querySelector('.nav-icon');
 			const src = icon.getAttribute('src').replace('.svg', '-active.svg');
