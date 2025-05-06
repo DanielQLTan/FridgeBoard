@@ -684,10 +684,11 @@ async function addSticky({title, expDate, quantity, color = "#fffef5", category 
     
     refreshStickerDisplay(gridActive);
   }
+  console.log(category)
 }
 
 // ============================================================================
-// Section 7: Tidy Up & Grid Arrangement
+// Section 7: Tidy Up & Grid Arrangement 
 // ============================================================================
 // Event listener for "Tidy Up" button
 tidyUpBtn.addEventListener('click', () => {
