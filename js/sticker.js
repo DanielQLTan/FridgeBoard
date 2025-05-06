@@ -660,7 +660,7 @@ async function addSticky({title, expDate, quantity, color = "#fffef5", category 
         }
       ).then(r => r.text());
 
-      category = catResp.trim() || 'Other';
+      category = catResp.trim() || 'Others';
     } catch (err) {
       console.error('Category API error:', err);
       category = 'Other';

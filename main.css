@@ -45,9 +45,7 @@ a {
 
 
 
-
 /* Sticker Card */
-
 .card-grid {
   display: flex;
   flex-wrap: wrap;
@@ -58,8 +56,9 @@ a {
 /* Item card styling */
 .item-card {
   width: 150px;
+  height: 150px;
   margin: 0.5rem;
-  background-color: white;
+  background-color: #f7f4e8;
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
   border-radius: 0.25rem;
   transition: transform 0.2s, box-shadow 0.2s;
@@ -125,19 +124,6 @@ a {
   opacity: 1;
 }
 
-/* Category section styling (used only in category page) */
-.category-section {
-  margin-bottom: 3rem;
-  padding: 1.5rem;
-  border-radius: 0.5rem;
-}
-
-/* Category header */
-.category-header {
-  margin-bottom: 1rem;
-  font-size: 1.75rem;
-}
-
 
 
 /* Category / Expiration */
@@ -156,15 +142,15 @@ h1 {
 
 .group h2 {
   font-size: 24px;
+  font-weight: bold;
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px,1fr));
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   gap: 2.5%;
 }
 
-.item-card {
-  width: 150px;
-  height: 150px;
+.item-card p, h4 {
+  margin: 5% 10%;
 }

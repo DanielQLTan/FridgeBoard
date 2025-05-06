@@ -1,56 +1,46 @@
-const categories = ['Fruits', 'Vegetables', 'Dairy', 'Meat', 'Seafood', 'Beverage', 'Others'];
-
-const groupMap = {};
-
-const groupsParent = document.getElementById('groups');
-
-for (cat of categories) {
-	const g = makeGroup(cat, cat);
-  	groupMap[cat] = g;
-  	groupsParent.appendChild(g.wrapper);
-}
-
-
-
-const stickers = JSON.parse(localStorage.getItem('stickers') || '[]');
-
-for (sticker of stickers) {
-	let bucketKey = sticker.category;
-	const bucket = groupMap[sticker.category];
-	bucket.grid.appendChild(addSticker(sticker));
-}
-
-
-  
-function makeGroup(title, className){
-	const wrapper = document.createElement('section');
-    wrapper.className = `group ${className}`;
-  
-    const h2 = document.createElement('h2');
-    h2.textContent = title;
-    wrapper.appendChild(h2);
-  
+function makeCategory(category){
+ 	const section = document.createElement('div');
+    section.className = `group ${category}`;
+    const name = document.createElement('h2');
+    name.textContent = category;
     const grid = document.createElement('div');
     grid.className = 'grid';
-    wrapper.appendChild(grid);
-    return { wrapper, grid };
+    section.append(name, grid);
+    return {section, grid};
 }
   
 function addSticker(sticker){
-    const card = document.createElement('div');
+ 	const card = document.createElement('div');
     card.className = 'item-card';
-  
-    const title = document.createElement('h4');
-    title.textContent = sticker.title ?? 'item';
-    title.style.margin = '6px 8px 0';
-    title.style.fontSize = '1.2rem';
-  
+    const name = document.createElement('h4');
+    const title = sticker.title + ' (';
+    const quantity = sticker.quantity + ')';
+    name.textContent = title + quantity;
     const date = document.createElement('p');
-    date.textContent = sticker.expDate ?? '';
-    date.style.margin = '2px 8px 0';
-    date.style.fontSize = '0.8rem';
-    date.style.color   = '#666';
-  
-    card.append(title, date);
+    date.textContent = sticker.expDate;
+    date.style.color = 'gray';
+    card.append(name, date);
     return card;
+}
+
+const categoryMap = {};
+const categoryDiv = document.getElementById('groups');
+const categories = [
+	'Fruits',
+	'Vegetables',
+	'Dairy',
+	'Meat', 
+	'Seafood',
+	'Beverage',
+	'Others'];
+for (category of categories) {
+	const make = makeCategory(category);
+	categoryMap[category] = make;
+	categoryDiv.append(make.section);
+}
+
+const stickers = JSON.parse(localStorage.getItem('stickers'));
+for (sticker of stickers) {
+	const card = addSticker(sticker);
+	categoryMap[sticker.category].grid.append(card);
 }
