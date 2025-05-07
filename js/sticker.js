@@ -693,6 +693,13 @@ async function addSticky({title, expDate, quantity, color = "#fffef5", category 
   }
 }
 
-window.addEventListener('dblclick', function(event) {
-  refreshStickerDisplay(false);
-});
+function maybeDoubleTap(e) {
+  if (e.detail === 2) {
+    e.preventDefault();
+    refreshStickerDisplay(false);
+  }
+}
+
+const opts = { passive: false };
+window.addEventListener('click',  maybeDoubleTap, opts);
+window.addEventListener('dblclick', maybeDoubleTap);

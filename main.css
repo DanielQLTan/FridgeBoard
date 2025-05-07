@@ -7,6 +7,10 @@ a {
   text-decoration: none;
 }
 
+html {
+  touch-action: manipulation;
+}
+
 
 
 /* Navbar */
