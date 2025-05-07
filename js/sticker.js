@@ -693,13 +693,19 @@ async function addSticky({title, expDate, quantity, color = "#fffef5", category 
   }
 }
 
-function maybeDoubleTap(e) {
-  if (e.detail === 2) {
-    e.preventDefault();
+let lastTap = 0;
+const TAP_DELAY = 300;
+
+function onPointerDown(e) {
+  if (e.pointerType !== 'touch') return;
+  const now = e.timeStamp;
+  if (now - lastTap < TAP_DELAY) {
     refreshStickerDisplay(false);
+    lastTap = 0;
+  } else {
+    lastTap = now;
   }
 }
 
-const opts = { passive: false };
-window.addEventListener('click',  maybeDoubleTap, opts);
-window.addEventListener('dblclick', maybeDoubleTap);
+window.addEventListener('pointerdown', onPointerDown, { passive: true });
+window.addEventListener('dblclick',   () => refreshStickerDisplay(false));
