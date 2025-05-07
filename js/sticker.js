@@ -3,7 +3,7 @@
 // Sections:
 //   1. Global DOM Elements
 //   2. Add Item Pop-up page (typing/handwriting panel)
-//   3. Section 3: Scan Stickers (camera capture)
+//   3. Section 3: Scan Stickers (camera capture)
 //   4. LocalStorage for sticker objects
 //   5. Sticker Display & Layout
 //   6. Drag & Positioning Utilities
@@ -11,7 +11,7 @@
 // =============================================================================
 
 // ============================================================================
-// Section 1: Global DOM Elements & Helper function
+// Section 1: Global DOM Elements & Helper function
 // ============================================================================
 
 const stickyBoard = document.getElementById("sticky-board");
@@ -30,7 +30,7 @@ function setGridMode(on){
 }
 
 // ============================================================================
-// Section 2: Add Item Pop-up page (typing/handwriting panel)
+// Section 2: Add Item Pop-up page (typing/handwriting panel)
 // ============================================================================
 
 const handwritingCanvas  = document.getElementById('handwriting-canvas');
@@ -47,17 +47,62 @@ const quantityInput  = document.getElementById('quantity-input');
 //------------------ hand writing panel helpers ---------------------------
 // logic for drawing
 let drawing = false;
+
+// Helper function to get coordinates from either mouse or touch event
+function getCoordinates(e) {
+  const rect = handwritingCanvas.getBoundingClientRect();
+  if (e.touches) {
+    // Touch event
+    return {
+      x: e.touches[0].clientX - rect.left,
+      y: e.touches[0].clientY - rect.top
+    };
+  } else {
+    // Mouse event
+    return {
+      x: e.offsetX,
+      y: e.offsetY
+    };
+  }
+}
+
+// Mouse events
 handwritingCanvas.addEventListener('mousedown', e => {
   drawing = true;
+  const coords = getCoordinates(e);
   ctx.beginPath();
-  ctx.moveTo(e.offsetX, e.offsetY);
+  ctx.moveTo(coords.x, coords.y);
 });
+
 handwritingCanvas.addEventListener('mousemove', e => {
   if (!drawing) return;
-  ctx.lineTo(e.offsetX, e.offsetY);
+  const coords = getCoordinates(e);
+  ctx.lineTo(coords.x, coords.y);
   ctx.stroke();
 });
+
 ['mouseup', 'mouseleave'].forEach(ev =>
+  handwritingCanvas.addEventListener(ev, () => (drawing = false))
+);
+
+// Touch events
+handwritingCanvas.addEventListener('touchstart', e => {
+  e.preventDefault(); // Prevent scrolling while drawing
+  drawing = true;
+  const coords = getCoordinates(e);
+  ctx.beginPath();
+  ctx.moveTo(coords.x, coords.y);
+}, { passive: false });
+
+handwritingCanvas.addEventListener('touchmove', e => {
+  e.preventDefault(); // Prevent scrolling while drawing
+  if (!drawing) return;
+  const coords = getCoordinates(e);
+  ctx.lineTo(coords.x, coords.y);
+  ctx.stroke();
+}, { passive: false });
+
+['touchend', 'touchcancel'].forEach(ev =>
   handwritingCanvas.addEventListener(ev, () => (drawing = false))
 );
 
@@ -157,7 +202,7 @@ closeModalBtn.addEventListener('click', function() {
 
 
 // ============================================================================
-// Section 3: Scan Stickers (camera capture)
+// Section 3: Scan Stickers (camera capture)
 // ============================================================================
 
 const scanForm  = document.querySelector(".upload-sticker form");
@@ -286,7 +331,7 @@ confirmBtn.addEventListener('click', async ()=>{
 
 
 // ============================================================================
-// Section 4: LocalStorage for sticker objects
+// Section 4: LocalStorage for sticker objects
 // ============================================================================
 // Function to save stickers to localStorage
 function saveStickersToStorage(stickers) {
@@ -301,7 +346,7 @@ function loadStickersFromStorage() {
 }
 
 // ============================================================================
-// Section 5: Sticker Display & Layout
+// Section 5: Sticker Display & Layout
 // ============================================================================
 // Load existing stickers on page load
 window.addEventListener('load', () => {
@@ -321,7 +366,7 @@ function deleteSticker(indexToRemove) {
     const cardNodes = container.querySelectorAll('.item-card');
 
     cardNodes.forEach((card, domIdx) => {
-      if (domIdx === indexToRemove) return;     // skip the one we’ll delete
+      if (domIdx === indexToRemove) return;     // skip the one we'll delete
       if (!stickers[domIdx]) return;            // safety
 
       const rect = card.getBoundingClientRect();
@@ -417,11 +462,15 @@ function createDraggableCard(sticker, index, container, grid = false) {
   deleteBtn.innerHTML = '×';
   deleteBtn.title = 'Delete this item';
   
-  // Add delete functionality
-  deleteBtn.addEventListener('click', (event) => {
+  // Add delete functionality for both click and touch
+  const handleDelete = (event) => {
+    event.preventDefault();
     event.stopPropagation();
     deleteSticker(index);
-  });
+  };
+  
+  deleteBtn.addEventListener('click', handleDelete);
+  deleteBtn.addEventListener('touchstart', handleDelete, { passive: false });
   
   // Add NEW indicator if sticker is new
   if (sticker.isNew) {
@@ -465,7 +514,7 @@ function removeNewIndicator(index) {
 }
 
 // ============================================================================
-// Section 6: Drag & Positioning Utilities
+// Section 6: Drag & Positioning Utilities
 // ============================================================================
 // Function to make an element draggable
 function makeDraggable(element, stickerIndex) {
