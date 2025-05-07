@@ -187,6 +187,7 @@ function closeScanModal(){
   recaptureBtn.style.display= 'none';
   confirmBtn.style.display  = 'none';
   capturedDataUrl = null;
+  stopMedia();
 }
 
 //------------- open the pop-up page ----------------------------
@@ -210,6 +211,13 @@ scanBtn.addEventListener('click', async (e) => {
   captureBtn.disabled = !videoReady;
   openScanModal();
 });
+
+scanModal.addEventListener("hidden.bs.modal", stopMedia);
+function stopMedia() {
+	for (const track of videoStream.getTracks()) {
+		track.stop();
+	}
+}
 
 //---------------- close the pop-up page ---------------------------
 scanCloseBtn.addEventListener('click', closeScanModal);
@@ -332,6 +340,8 @@ function deleteSticker(indexToRemove) {
 
 // Function to refresh the sticker display
 function refreshStickerDisplay(useGridLayout = false) {
+
+
   // Clear the current stickers
   stickyBoard.innerHTML = '';
   
@@ -353,7 +363,7 @@ function refreshStickerDisplay(useGridLayout = false) {
   }
   
   // Create cards in grid or free positions
-  if (useGridLayout) {
+  if (gridActive) {
     arrangeCardsInGrid(savedStickers, cardContainer);
   } else {
     savedStickers.forEach((sticker, index) => {
@@ -362,6 +372,8 @@ function refreshStickerDisplay(useGridLayout = false) {
   }
   
   stickyBoard.appendChild(cardContainer);
+
+  gridActive = !gridActive;
 }
 
 // Function to arrange cards in a grid layout
@@ -390,16 +402,14 @@ function createDraggableCard(sticker, index, container, grid = false) {
   }
   card.style.zIndex = 1;
   
-  const cardBody = document.createElement('div');
-  cardBody.className = 'item-card-body';
-  
-  const itemName = document.createElement('p');
-  itemName.className = 'item-name';
-  itemName.textContent = sticker.title || 'Untitled';
-  
-  const expireDate = document.createElement('p');
-  expireDate.className = 'item-date';
-  expireDate.textContent = sticker.expDate || 'No expiration date';
+  	const name = document.createElement('h4');
+	const title = sticker.title + ' (';
+	const quantity = sticker.quantity + ')';
+	name.textContent = title + quantity;
+	const date = document.createElement('p');
+	date.textContent = sticker.expDate;
+	date.style.color = 'gray';
+	card.append(name, date);
   
   // Create delete button
   const deleteBtn = document.createElement('button');
@@ -428,11 +438,8 @@ function createDraggableCard(sticker, index, container, grid = false) {
   makeDraggable(card, index);
   
   // Assemble card
-  cardBody.appendChild(itemName);
-  cardBody.appendChild(expireDate);
-  cardBody.appendChild(deleteBtn);
+  card.appendChild(deleteBtn);
   
-  card.appendChild(cardBody);
   container.appendChild(card);
 }
 
@@ -686,28 +693,6 @@ async function addSticky({title, expDate, quantity, color = "#fffef5", category 
   }
 }
 
-// ============================================================================
-// Section 7: Tidy Up & Grid Arrangement 
-// ============================================================================
-// Event listener for "Tidy Up" button
-tidyUpBtn.addEventListener('click', () => {
-  // Remove all NEW indicators when tidying up
-  const stickers = loadStickersFromStorage();
-  let hasChanges = false;
-  
-  stickers.forEach((sticker, index) => {
-    if (sticker.isNew) {
-      sticker.isNew = false;
-      hasChanges = true;
-    }
-  });
-  
-  if (hasChanges) {
-    saveStickersToStorage(stickers);
-  }
-  
-  setGridMode(true);
-
-  // Arrange all stickers in grid layout
-  refreshStickerDisplay(true);
+window.addEventListener('dblclick', function(event) {
+  refreshStickerDisplay(false);
 });

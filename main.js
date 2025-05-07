@@ -6,19 +6,19 @@ function nav() {
 				<div class="nav-text">Home</div>
 			</a>
 			<a href="../html/category.html" class="nav-item">
-				<img class="nav-icon" src="../img/grid.svg" alt="Category">
+				<img class="nav-icon" src="../img/grid.svg" alt="Sort">
 				<div class="nav-text">Sort</div>
 			</a>
 			<a href="../html/expiration.html" class="nav-item">
-				<img class="nav-icon" src="../img/calendar.svg" alt="Expiration">
+				<img class="nav-icon" src="../img/calendar.svg" alt="Track">
 				<div class="nav-text">Track</div>
 			</a>
-			<a href="###" class="nav-item">
-				<img class="nav-icon" src="../img/cart.svg" alt="Shopping">
+			<a href="../html/shopping.html" class="nav-item">
+				<img class="nav-icon" src="../img/cart.svg" alt="Shop">
 				<div class="nav-text">Shop</div>
 			</a>
 			<a href="###" class="nav-item">
-				<img class="nav-icon" src="../img/user.svg" alt="Profile">
+				<img class="nav-icon" src="../img/user.svg" alt="Me">
 				<div class="nav-text">Me</div>
 			</a>
 		</div>`;

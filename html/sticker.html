@@ -16,8 +16,7 @@
 
 		<!-- 3 Main Buttons -->
 		<div class="action-buttons-container">
-			<button class="action-button" id="add-item-btn">Add New Item</button>
-			<button class="action-button tidy-button" id="tidy-up-btn">Tidy Up</button>
+			<button class="action-button" id="add-item-btn">New Sticker</button>
 			<div class="upload-sticker">
 				<form onsubmit="return false;">
 					<input type="submit" value="Scan Sticker" class="btn action-button" />
@@ -46,63 +45,64 @@
 			</div>
 			</div>
 		</div>
+		<!-- Typing / Handwriting Modal -->
+		<div id="handwriting-modal" class="modal-overlay">
+			<div class="modal-content">
+			<button id="close-modal-btn" class="close-btn">&times;</button>
+		
+			<!-- -------------  TYPING ------------- -->
+			<div id="typing-form">
+				<div class="input-section mb-2">
+				<label class="form-label mb-1">Item name</label>
+				<input type="text" id="item-input" class="form-control" />
+				</div>
+				<div class="input-section mb-2">
+				<label class="form-label mb-1">Expiration date</label>
+				<input type="date" id="date-input" class="form-control" />
+				</div>
+				<div class="input-section mb-3">
+				<label class="form-label mb-1">Quantity</label>
+				<input type="text" id="quantity-input" class="form-control" />
+				</div>
+			</div>
+		
+			<!-- -------------  HANDWRITING ------------- -->
+			<div id="handwriting-form" style="display:none;">
+				<div class="position-relative mb-3" style="max-width:500px;">
+				<canvas id="handwriting-canvas"
+						width="500" height="300"
+						style="border:1px solid #ccc;"></canvas>
+		
+				<div class="position-absolute top-0 start-0 w-100 h-100
+							text-muted"
+					style="pointer-events:none; font-size:18px; padding:10px;
+							display:flex; flex-direction:column;
+							justify-content:space-between;">
+					<span>Item name</span>
+					<span>Expiration date</span>
+					<span>Quantity</span>
+				</div>
+				</div>
+			</div>
+		
+	        <!-- -------------  ACTIONS ------------- -->
+	        <div class="input-wrapper position-relative">
+	          <!-- Add‑item button -->
+	          <button id="add-item-submit" class="add-item-button">Add item</button>
+
+	          <!-- Switch button -->
+	          <button id="toggle-handwriting-btn"
+	                  class="floating-switch"
+	                  title="Switch input mode">
+	            <img src="../img/Edit.svg" alt="toggle input icon" />
+	          </button>
+	        </div>
+			</div>
+		</div>
 		<section id="sticky-board"></section>
 	</div>
 
-	<!-- Typing / Handwriting Modal -->
-	<div id="handwriting-modal" class="modal-overlay">
-		<div class="modal-content">
-		<button id="close-modal-btn" class="close-btn">&times;</button>
 	
-		<!-- -------------  TYPING ------------- -->
-		<div id="typing-form">
-			<div class="input-section mb-2">
-			<label class="form-label mb-1">Item name</label>
-			<input type="text" id="item-input" class="form-control" />
-			</div>
-			<div class="input-section mb-2">
-			<label class="form-label mb-1">Expiration date</label>
-			<input type="date" id="date-input" class="form-control" />
-			</div>
-			<div class="input-section mb-3">
-			<label class="form-label mb-1">Quantity</label>
-			<input type="text" id="quantity-input" class="form-control" />
-			</div>
-		</div>
-	
-		<!-- -------------  HANDWRITING ------------- -->
-		<div id="handwriting-form" style="display:none;">
-			<div class="position-relative mb-3" style="max-width:500px;">
-			<canvas id="handwriting-canvas"
-					width="500" height="300"
-					style="border:1px solid #ccc;"></canvas>
-	
-			<div class="position-absolute top-0 start-0 w-100 h-100
-						text-muted"
-				style="pointer-events:none; font-size:18px; padding:10px;
-						display:flex; flex-direction:column;
-						justify-content:space-between;">
-				<span>Item name</span>
-				<span>Expiration date</span>
-				<span>Quantity</span>
-			</div>
-			</div>
-		</div>
-	
-        <!-- -------------  ACTIONS ------------- -->
-        <div class="input-wrapper position-relative">
-          <!-- Add‑item button -->
-          <button id="add-item-submit" class="add-item-button">Add item</button>
-
-          <!-- Switch button -->
-          <button id="toggle-handwriting-btn"
-                  class="floating-switch"
-                  title="Switch input mode">
-            <img src="../img/Edit.svg" alt="toggle input icon" />
-          </button>
-        </div>
-		</div>
-	</div>
 
 	<script src="../main.js"></script>
 	<script src="../js/sticker.js"></script>

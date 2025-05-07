@@ -67,7 +67,7 @@ p {
 .item-card.draggable {
   cursor: grab;
   transition: box-shadow 0.2s ease;
-  width: 180px;
+/*  width: 180px;*/
   position: absolute;
   z-index: 1;
 }
@@ -296,12 +296,4 @@ canvas {
 }
 .upload-sticker form{
   display:inline-block;
-}
-
-/* part 5 */
-
-/* sticker card size */
-.item-card{
-  width: 220px;
-  height: 100px;
 }
