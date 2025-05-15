@@ -9,11 +9,104 @@
 	<link rel="stylesheet" href="../css/sticker.css">
 </head>
 <body>
-	<p>This is the page for stickers.</p>
-	<a href="../index.html">
-  		<button class="btn btn-warning">Home</button>
-	</a>
 
+	<div class="container mt-4">
+		
+		<h1>Add your thoughts here!</h1>
+
+		<!-- 3 Main Buttons -->
+		<div class="action-buttons-container">
+			<button class="action-button" id="add-item-btn">New Sticker</button>
+			<div class="upload-sticker">
+				<form onsubmit="return false;">
+					<input type="submit" value="Scan Sticker" class="btn action-button" />
+				</form>
+			</div>
+		</div>
+
+		<!-- Camera capture modal for scanning stickers -->
+		<div id="scan-modal" class="modal-overlay" style="display:none;">
+			<div class="modal-content" style="max-width:560px;">
+			<button id="scan-close-btn" class="close-btn">&times;</button>
+
+			<video id="camera-video" autoplay playsinline
+					style="background:black; width:100%; aspect-ratio:4/3;"></video>
+		
+			<img id="captured-img" class="d-none" style="width:100%;" />
+		
+			<p class="text-muted mt-2 mb-3" id="capture-hint">
+				Align the sticker then tap <strong>Capture</strong>.
+			</p>
+		
+			<div class="d-flex justify-content-between">
+				<button id="recapture-btn" class="btn btn-secondary d-none">Re‑capture</button>
+				<button id="capture-btn"  class="btn btn-primary">Capture</button>
+				<button id="confirm-btn"  class="btn btn-success d-none">Confirm</button>
+			</div>
+			</div>
+		</div>
+		<!-- Typing / Handwriting Modal -->
+		<div id="handwriting-modal" class="modal-overlay">
+			<div class="modal-content">
+			<button id="close-modal-btn" class="close-btn">&times;</button>
+		
+			<!-- -------------  TYPING ------------- -->
+			<div id="typing-form">
+				<div class="input-section mb-2">
+				<label class="form-label mb-1">Item name</label>
+				<input type="text" id="item-input" class="form-control" />
+				</div>
+				<div class="input-section mb-2">
+				<label class="form-label mb-1">Expiration date</label>
+				<input type="date" id="date-input" class="form-control" />
+				</div>
+				<div class="input-section mb-3">
+				<label class="form-label mb-1">Quantity</label>
+				<input type="text" id="quantity-input" class="form-control" />
+				</div>
+			</div>
+		
+			<!-- -------------  HANDWRITING ------------- -->
+			<div id="handwriting-form" style="display:none;">
+				<div class="position-relative mb-3" style="max-width:500px;">
+				<canvas id="handwriting-canvas"
+						width="500" height="300"
+						style="border:1px solid #ccc;"></canvas>
+		
+				<div class="position-absolute top-0 start-0 w-100 h-100
+							text-muted"
+					style="pointer-events:none; font-size:18px; padding:10px;
+							display:flex; flex-direction:column;
+							justify-content:space-between;">
+					<span>Item name</span>
+					<span>Expiration date</span>
+					<span>Quantity</span>
+				</div>
+				</div>
+			</div>
+		
+	        <!-- -------------  ACTIONS ------------- -->
+	        <div class="input-wrapper position-relative">
+	          <!-- Add‑item button -->
+	          <button id="add-item-submit" class="add-item-button">Add item</button>
+
+	          <!-- Switch button -->
+	          <button id="toggle-handwriting-btn"
+	                  class="floating-switch"
+	                  title="Switch input mode">
+	            <img src="../img/Edit.svg" alt="toggle input icon" />
+	          </button>
+	        </div>
+			</div>
+		</div>
+		<section id="sticky-board"></section>
+	</div>
+
+	
+
+	<script src="../main.js"></script>
 	<script src="../js/sticker.js"></script>
+	
+
 </body>
 </html>

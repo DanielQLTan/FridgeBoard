@@ -1,0 +1,15 @@
+.C{background:#f6c5cb;}
+.T{background:#f4b4a9;}
+.W{background:#c7e6d4;}
+.S{background:#dcd4e3;}
+
+.item-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.item-card img {
+  width: 100px;
+  height: 100px;
+}
